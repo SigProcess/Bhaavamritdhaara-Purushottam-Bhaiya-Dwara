@@ -1,6 +1,6 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
-import CardGrid from './components/CardGrid'
+import PlaylistSections from './components/PlaylistSections'
 import PetalsLayer from './components/PetalsLayer'
 import Footer from './components/Footer'
 
@@ -14,7 +14,7 @@ export default function App() {
       <Nav />
       <main>
         <Hero />
-        <CardGrid />
+        <PlaylistSections />
       </main>
       <Footer />
     </div>
