@@ -181,3 +181,113 @@ font-size:0.9rem;letter-spacing:0.08em;
 background:rgba(232,240,230,0.5);
 }
 .footer-om{display:block;font-size:1.4rem;color:var(--gold);opacity:0.5;margin-top:6px;font-style:normal}
+
+/* === Sections === */
+.sections-container{padding:0 1.5rem 6rem;max-width:1280px;margin:0 auto;position:relative;z-index:10}
+.section-label{
+text-align:center;font-family:'Jost',sans-serif;font-size:0.68rem;letter-spacing:0.25em;
+text-transform:uppercase;color:var(--sage);margin-bottom:2rem;
+}
+
+/* === Collection Cards === */
+.collections-grid{
+display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;margin-bottom:1rem;
+}
+@media(min-width:1024px){.collections-grid{grid-template-columns:repeat(4,1fr);gap:1.75rem}}
+
+.collection-card{
+background:rgba(245,240,232,0.88);border-radius:16px;
+border:2px solid rgba(212,175,55,0.4);position:relative;cursor:pointer;
+padding:20px 16px;text-align:center;
+transition:transform 0.4s cubic-bezier(.23,1,.32,1),box-shadow 0.4s ease,border-color 0.3s ease;
+animation:fadeInUp 0.7s ease both;backdrop-filter:blur(8px);
+}
+.collection-card:hover{
+transform:translateY(-6px) scale(1.02);
+box-shadow:0 16px 40px rgba(45,90,39,0.18),0 0 0 1px rgba(212,175,55,0.5);
+border-color:var(--gold);
+}
+.collection-card.expanded{
+border-color:var(--gold);
+box-shadow:0 8px 24px rgba(45,90,39,0.15),0 0 0 1px rgba(212,175,55,0.5);
+transform:translateY(-2px);
+}
+.collection-card-title{
+font-family:'Playfair Display',serif;font-size:1rem;color:var(--dark-green);
+font-weight:600;line-height:1.3;margin-bottom:6px;
+}
+.collection-card-count{
+font-family:'Jost',sans-serif;font-size:0.65rem;letter-spacing:0.15em;
+text-transform:uppercase;color:var(--sage);
+}
+.collection-card-icon{
+font-size:0.75rem;color:var(--gold);margin-top:8px;
+transition:transform 0.3s ease;display:inline-block;
+}
+.collection-card.expanded .collection-card-icon{transform:rotate(180deg)}
+
+/* === Expanded Sub-Playlists === */
+.collection-expanded-wrap{
+overflow:hidden;transition:max-height 0.4s ease;max-height:0;
+}
+.collection-expanded-wrap.open{max-height:600px}
+.collection-expanded{
+background:rgba(45,90,39,0.08);border-radius:12px;
+border:1px solid rgba(212,175,55,0.2);
+padding:16px;margin-bottom:2.5rem;
+}
+.sub-playlists-grid{
+display:grid;grid-template-columns:repeat(2,1fr);gap:10px;
+}
+@media(min-width:768px){.sub-playlists-grid{grid-template-columns:repeat(3,1fr)}}
+
+.sub-playlist-btn{
+display:flex;align-items:center;gap:8px;
+padding:10px 14px;border-radius:8px;border:none;cursor:pointer;
+background:rgba(45,90,39,0.15);color:var(--dark-green);
+font-family:'Jost',sans-serif;font-size:0.78rem;font-weight:400;
+text-align:left;width:100%;
+transition:background 0.2s ease,transform 0.2s ease;
+}
+.sub-playlist-btn:hover{
+background:rgba(45,90,39,0.25);transform:translateY(-2px);
+}
+.sub-playlist-btn .play-icon{width:12px;height:12px;flex-shrink:0;color:var(--gold)}
+
+/* === Individual Playlist Cards (simplified) === */
+.playlists-section{margin-top:3rem}
+.playlists-grid{
+display:grid;grid-template-columns:repeat(2,1fr);gap:1.5rem;
+}
+@media(min-width:768px){.playlists-grid{grid-template-columns:repeat(3,1fr);gap:1.75rem}}
+@media(min-width:1024px){.playlists-grid{grid-template-columns:repeat(4,1fr);gap:1.75rem}}
+
+.playlist-card{
+background:rgba(245,240,232,0.88);border-radius:12px;
+border:1px solid rgba(212,175,55,0.2);position:relative;cursor:pointer;
+padding:16px;
+transition:transform 0.4s cubic-bezier(.23,1,.32,1),box-shadow 0.4s ease;
+animation:fadeInUp 0.7s ease both;backdrop-filter:blur(8px);
+}
+.playlist-card:hover{
+transform:translateY(-6px) scale(1.02);
+box-shadow:0 16px 40px rgba(45,90,39,0.15),0 0 0 1px rgba(212,175,55,0.4);
+}
+.playlist-card-title{
+font-family:'Playfair Display',serif;font-size:0.9rem;color:var(--dark-green);
+font-weight:600;line-height:1.3;margin-bottom:10px;
+}
+.playlist-card-btn{
+display:flex;align-items:center;justify-content:center;gap:7px;
+width:100%;padding:8px 0;border-radius:8px;border:none;cursor:pointer;
+font-family:'Jost',sans-serif;font-size:0.68rem;font-weight:500;letter-spacing:0.12em;
+text-transform:uppercase;color:var(--dark-green);
+background:linear-gradient(135deg,#D4AF37,#F0D060,#C8941A);
+position:relative;overflow:hidden;
+transition:opacity 0.2s ease,transform 0.2s ease;
+}
+.playlist-card-btn::before{
+content:'';position:absolute;inset:0;
+background:linear-gradient(135deg,rgba(255,255,255,0.25),transparent,rgba(255,255,255,0.1));
+}
+.playlist-card-btn:hover{opacity:0.92;transform:scale(0.98)}
