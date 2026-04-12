@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import data from '../data/playlists.json'
-import CollectionCard from './CollectionCard'
+import { CollectionCardButton, CollectionExpanded } from './CollectionCard'
 import Card from './Card'
 
 export default function PlaylistSections() {
@@ -10,12 +10,14 @@ export default function PlaylistSections() {
     setExpandedId(expandedId === id ? null : id)
   }
 
+  const expandedCollection = data.collections.find((c) => c.id === expandedId)
+
   return (
     <div className="sections-container">
       <div className="section-label">Collections</div>
       <div className="collections-grid">
         {data.collections.map((col) => (
-          <CollectionCard
+          <CollectionCardButton
             key={col.id}
             collection={col}
             isExpanded={expandedId === col.id}
@@ -23,6 +25,13 @@ export default function PlaylistSections() {
           />
         ))}
       </div>
+      {expandedCollection && (
+        <CollectionExpanded
+          key={expandedCollection.id}
+          collection={expandedCollection}
+          isExpanded={true}
+        />
+      )}
 
       <div className="playlists-section">
         <div className="section-label">All Playlists</div>

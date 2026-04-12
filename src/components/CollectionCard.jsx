@@ -6,36 +6,36 @@ function PlayIcon() {
   )
 }
 
-export default function CollectionCard({ collection, isExpanded, onToggle }) {
+export function CollectionCardButton({ collection, isExpanded, onToggle }) {
   return (
-    <div>
-      <div
-        className={`collection-card${isExpanded ? ' expanded' : ''}`}
-        onClick={onToggle}
-      >
-        <div className="collection-card-title">{collection.title}</div>
-        <div className="collection-card-count">
-          {collection.playlists.length} {collection.playlists.length === 1 ? 'playlist' : 'playlists'}
-        </div>
-        <div className="collection-card-icon">▼</div>
+    <div
+      className={`collection-card${isExpanded ? ' expanded' : ''}`}
+      onClick={onToggle}
+    >
+      <div className="collection-card-title">{collection.title}</div>
+      <div className="collection-card-count">
+        {collection.playlists.length} {collection.playlists.length === 1 ? 'playlist' : 'playlists'}
       </div>
-      <div className={`collection-expanded-wrap${isExpanded ? ' open' : ''}`}>
-        <div className="collection-expanded">
-          <div className="sub-playlists-grid">
-            {collection.playlists.map((p) => (
-              <button
-                key={p.id}
-                className="sub-playlist-btn"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  window.open(p.url, '_blank')
-                }}
-              >
-                <PlayIcon />
-                {p.title}
-              </button>
-            ))}
-          </div>
+      <div className="collection-card-icon">▼</div>
+    </div>
+  )
+}
+
+export function CollectionExpanded({ collection, isExpanded }) {
+  return (
+    <div className={`collection-expanded-wrap${isExpanded ? ' open' : ''}`}>
+      <div className="collection-expanded">
+        <div className="sub-playlists-grid">
+          {collection.playlists.map((p) => (
+            <button
+              key={p.id}
+              className="sub-playlist-btn"
+              onClick={() => window.open(p.url, '_blank')}
+            >
+              <PlayIcon />
+              {p.title}
+            </button>
+          ))}
         </div>
       </div>
     </div>
