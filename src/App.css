@@ -17,7 +17,7 @@ html,body{min-height:100%;background:var(--parchment)}
 .app{
 min-height:100vh;
 background:linear-gradient(160deg,#e8f0e6 0%,#d9e8d4 25%,#e8e0cc 50%,#d4e0d2 75%,#e0dcc8 100%);
-position:relative;overflow:hidden;font-family:'Jost',sans-serif;
+position:relative;overflow-x:hidden;font-family:'Jost',sans-serif;
 }
 
 /* === Video Background === */
