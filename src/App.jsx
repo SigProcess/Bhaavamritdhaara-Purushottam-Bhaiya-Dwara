@@ -7,6 +7,10 @@ import Footer from './components/Footer'
 export default function App() {
   return (
     <div className="app">
+      <video className="bg-video" autoPlay muted loop playsInline>
+        <source src="/bg-video.mp4" type="video/mp4" />
+      </video>
+      <div className="bg-video-overlay" />
       <div className="bg-om">
         <div className="bg-om-text">ॐ</div>
       </div>

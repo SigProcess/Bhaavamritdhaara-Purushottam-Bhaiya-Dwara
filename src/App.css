@@ -20,6 +20,16 @@ background:linear-gradient(160deg,#e8f0e6 0%,#d9e8d4 25%,#e8e0cc 50%,#d4e0d2 75%
 position:relative;overflow:hidden;font-family:'Jost',sans-serif;
 }
 
+/* === Video Background === */
+.bg-video{
+position:fixed;inset:0;width:100%;height:100%;object-fit:cover;
+z-index:0;pointer-events:none;
+}
+.bg-video-overlay{
+position:fixed;inset:0;z-index:0;pointer-events:none;
+background:linear-gradient(160deg,rgba(232,240,230,0.82) 0%,rgba(217,232,212,0.78) 25%,rgba(232,224,204,0.8) 50%,rgba(212,224,210,0.78) 75%,rgba(224,220,200,0.82) 100%);
+}
+
 .bg-om{
 position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
 pointer-events:none;z-index:0;

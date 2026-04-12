@@ -1,13 +1,12 @@
 export default function Hero() {
   return (
     <div className="hero">
-      <div className="hero-eyebrow">Sacred Devotional Music</div>
+      <div className="hero-eyebrow">Links to YouTube videos on the channel</div>
       <h1 className="hero-title">
-        Anand Pranami <em>Bhajan</em><br />Playlist Collection
+        Bhaavamrit Dhaara <em>Purushottam Bhaiya Dwara</em>
       </h1>
       <p className="hero-desc">
-        Immerse yourself in the divine vibrations of ancient devotional music.
-        Each playlist is a journey into the sacred realm of spiritual bliss.
+        Bhajans and Pravachans by shri Purushottam Bhaiya
       </p>
       <div className="divider">
         <div className="divider-line" />
