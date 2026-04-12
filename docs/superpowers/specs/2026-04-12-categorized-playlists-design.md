@@ -1,0 +1,141 @@
+# Categorized Playlists — Design Spec
+
+## Summary
+
+Restructure the playlist page from a flat grid of 4 cards into a sectioned layout with 59 playlists from the YouTube channel. Two sections: "Collections" (expandable groups) at top, "All Playlists" (individual cards) below. Collections expand inline to reveal sub-playlists.
+
+## Data Structure
+
+`src/data/playlists.json` changes from a flat array to:
+
+```json
+{
+  "collections": [
+    {
+      "id": "anand-pranami",
+      "title": "Anand Pranami Bhajans",
+      "playlists": [
+        { "id": 1, "title": "Anand Pranami 13", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1brovn9jKAndOixHYCu4ZLD" },
+        { "id": 2, "title": "Anand Pranami 12", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adwEkF_ib_6U2LkZPmFSen" },
+        { "id": 3, "title": "Anand Pranami 11", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yt1Vh4XGQxieiFATxOeGdl" },
+        { "id": 4, "title": "Anand Pranami 10", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZEWK_i9GM-hhlfr5CusPdr" },
+        { "id": 5, "title": "Anand Pranami 9", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aJibZjtm1_4ksVfhmEDH9v" },
+        { "id": 6, "title": "Anand Pranami 8", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZUzO0EZIQLWeU3viqNUnp_" },
+        { "id": 7, "title": "Anand Pranami 7", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b_yI8tWH2pTjAwDdovOftp" },
+        { "id": 8, "title": "Anand Pranami 5", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bcYaetCvyHL4dFYEn_7vy4" },
+        { "id": 9, "title": "Anand Pranami 4", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a7hUMOW903-v-qmJXxCqVT" },
+        { "id": 10, "title": "Anand Pranami 3", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bxn8XAdVsAxU_QzCWSFCQe" },
+        { "id": 11, "title": "Anand Pranami 2", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adbAmj-Xq-EZuPRoLH6fUh" },
+        { "id": 12, "title": "Anand Pranami 1", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YegHY-YtvXbW35YA9HvBB5" },
+        { "id": 13, "title": "Aanand Pranami Bhajans", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aCZ-ZeGw5VtpOzRk0iVoeD" },
+        { "id": 14, "title": "Anand Pranami Bhajans (Set A)", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YzVj4weYumjoIU1U-0zSGn" },
+        { "id": 15, "title": "Anand Pranami Bhajans (Set B)", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Z8SzRAsbxzkDTi1C2JOP7U" }
+      ]
+    },
+    {
+      "id": "raaj-maan",
+      "title": "Raaj Maan Diaries",
+      "playlists": [
+        { "id": 16, "title": "Raaj Maa First Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YMjahWF2w1mWu8Pq3wDrvt" },
+        { "id": 17, "title": "Raaj Maan ki Doosri Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bUu2X-RL_So5Ur_NISgB7y" },
+        { "id": 18, "title": "Raaj Maa Third and Fourth Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awsfXZtiTNL6kbNaDKgCz9" },
+        { "id": 19, "title": "Raaj Maan Fifth and Sixth Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bZOQYs5XI4kvoERYheC-lp" }
+      ]
+    },
+    {
+      "id": "bibiji",
+      "title": "Bibiji",
+      "playlists": [
+        { "id": 20, "title": "Nandan Kaanan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YXuNhT4h0h2iUyCAccYDj0" }
+      ]
+    },
+    {
+      "id": "mausiji",
+      "title": "Mausiji",
+      "playlists": [
+        { "id": 21, "title": "Sulochana Mausi Ji ke Naye Lekh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aNZT8pWpxrS-Cc9ptH5d07" }
+      ]
+    }
+  ],
+  "playlists": [
+    { "id": 22, "title": "Vani Vishleshan and Pravachan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y3IyLeKcg__-Z3BGOiwKwh" },
+    { "id": 23, "title": "Vani Vishleshan by Shri Purushottam Bhaiya, 2022", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZTwQUDcbwJNdtS42J63wd7" },
+    { "id": 24, "title": "Gyan Vani", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a9uHY5qXUnsVcS0RXWKNe2" },
+    { "id": 25, "title": "Sukh Lekh Vishleshan by Purushottam Bhaiya", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZNkWj5X9UlTAM_9xGxZGql" },
+    { "id": 26, "title": "Dharm hai ya Shishtaachaar", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y06TsBWQx0DHSqlXRE1Ku4" },
+    { "id": 27, "title": "Spiritual Bhajans", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Z9bVYZpUXi8KBmWP8TNd54" },
+    { "id": 28, "title": "Bhhav-Kann", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZAaoMBrNS0yZj-6gk23orf" },
+    { "id": 29, "title": "Sumir-Sumir Man Baaware", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YmmByMf8JuNdBSBR6Wh04D" },
+    { "id": 30, "title": "Madhuban Hriday hai Mera", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bJ659qDxqWdK2GfB9yV5f8" },
+    { "id": 31, "title": "Digambar Tera Roop", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZHEJXJhBkUSs1F0b5FGLU1" },
+    { "id": 32, "title": "Aaj Tera Saaj ya Raaj", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZBa-uMHkCvP8gO36KbGUhS" },
+    { "id": 33, "title": "Anjaane Anmaane Bhagwaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZP7HrekgQ-dHdg5-ZGrve1" },
+    { "id": 34, "title": "Tera Saurabh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YEWyEfUngLXS4tWXaMDSBx" },
+    { "id": 35, "title": "Kya Doon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a_9O7UPw67Sy2Dcw9J02YE" },
+    { "id": 36, "title": "Ye Kaliyaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YhVARMFd6X1UbNi_MoekHH" },
+    { "id": 37, "title": "Kaisa Bhool Bhulaiya", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZJpdr0Vdp8hJasI0Hc2lFv" },
+    { "id": 38, "title": "Mukti Mahaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZiAw-XEIooAWmnWCbSmTqA" },
+    { "id": 39, "title": "Bhakti hi Kyon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aLme1rJfTWS7wkVEFF-iEm" },
+    { "id": 40, "title": "Anant ka Chakra", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awTuPab4BHUWI7kFaogDok" },
+    { "id": 41, "title": "Shanti ka Udgam", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YUZxS_OW-fQguDXtZztCP3" },
+    { "id": 42, "title": "Kaam Tera Naam Mera", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bOeJmSskRhG3N03ErR6-Qe" },
+    { "id": 43, "title": "Prakriti aur Swabhaav", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Zp0FN8lSCa-Z_QsaIiLeqI" },
+    { "id": 44, "title": "Prakritik Bhajan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZIkqFR_SF_S4r217ZvPfo4" },
+    { "id": 45, "title": "Kyon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YZnfgh5vP70fLFeVTEzOU7" },
+    { "id": 46, "title": "Anaami ka Naam", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bnas1UyRdL-DockmUjS5yI" },
+    { "id": 47, "title": "Aanand Kahan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yjs92shoY4Su8lpEFQIaZI" },
+    { "id": 48, "title": "Aanand", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y8S2NxJBg0EY3XA2fzqTHB" },
+    { "id": 49, "title": "Samadhi", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZU4gebkbdKa8Prcdf31-co" },
+    { "id": 50, "title": "Dukh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YwRRQsA6DRi4dyaj_DS8Zn" },
+    { "id": 51, "title": "Meri Aakhon Mein Dekh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YSSnETY6LwXjVYcR2EEHJU" },
+    { "id": 52, "title": "Bhav mein Abhaav", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YOgsjfy3Rj0-T8CdXprY1R" },
+    { "id": 53, "title": "Bhaav-Yog", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aa1-UzSax9I3cm0ZY6rDRq" },
+    { "id": 54, "title": "Karm-Gyan ka Avsaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ayD2wSaMyPoJwe4SGqAnUc" },
+    { "id": 55, "title": "Prani ki Prerna", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y02kCK8neaDJPQK75Me0-S" },
+    { "id": 56, "title": "Chintan Manan Dhvani", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yd8UP_WzIDPKqfQhVW3Yj-" },
+    { "id": 57, "title": "Aanand Path", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aRm1N715TynmDN1KYnh4kx" },
+    { "id": 58, "title": "Man aur Tan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1blvm6VcYQ3arehSXVFZIbM" },
+    { "id": 59, "title": "Mere Sathi", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b8NjhYioElAOki0mlYWvvD" }
+  ]
+}
+```
+
+## Page Layout
+
+1. **Nav + Hero** — unchanged from current implementation
+2. **Collections section** — section label "Collections", responsive grid of collection cards (Anand Pranami, Raaj Maan, Bibiji, Mausiji). Each shows title + playlist count. Clicking expands sub-playlists inline below with slide animation. Click again to collapse.
+3. **All Playlists section** — section label "All Playlists", responsive grid of individual playlist cards. Each links directly to YouTube.
+4. **Footer** — unchanged
+
+## Component Changes
+
+| File | Action | Details |
+|------|--------|---------|
+| `src/data/playlists.json` | Rewrite | Restructure to `{ collections, playlists }` with all 59 playlists |
+| `src/components/CardGrid.jsx` | Delete | Replaced by PlaylistSections |
+| `src/components/PlaylistSections.jsx` | Create | Renders both sections, imports data |
+| `src/components/CollectionCard.jsx` | Create | Collection card with expand/collapse state, shows title + count |
+| `src/components/Card.jsx` | Modify | Remove unused GRADIENTS array, simplify for individual playlists (no card image area needed for the ~40 standalone playlists — just title + play button) |
+| `src/components/App.jsx` | Modify | Import PlaylistSections instead of CardGrid |
+| `src/App.css` | Modify | Add section label styles, collection card styles, expand/collapse animation, sub-playlist button styles |
+
+## Interaction Details
+
+- **Collection card click** → toggles `expanded` state
+- **Expand animation** → CSS `max-height` transition with overflow hidden for smooth slide
+- **Sub-playlist buttons** → appear in a grid below the collections row, each opens YouTube in new tab
+- **Only one collection expanded at a time** (clicking another collapses the current one)
+- **Individual playlist cards** → click opens YouTube in new tab (same as current)
+
+## Responsive Grid
+
+- Collections: 2 columns on mobile, 4 on desktop
+- All Playlists: 2 columns on mobile, 3 on tablet, 4 on desktop
+- Sub-playlists (expanded): 2 columns on mobile, 3 on desktop
+
+## Style Notes
+
+- Collection cards use gold border accent to distinguish from individual cards
+- Section labels use existing `.grid-label` style (uppercase, small, spaced lettering)
+- Sub-playlist buttons use a subtler style (forest green background, smaller text, play icon)
+- Expanded area has a subtle background tint to visually connect to the parent collection
