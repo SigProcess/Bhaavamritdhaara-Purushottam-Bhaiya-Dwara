@@ -1,25 +1,33 @@
 function PlayIcon() {
   return (
-    <svg className="play-icon" viewBox="0 0 24 24" fill="currentColor">
+    <svg viewBox="0 0 24 24" fill="currentColor">
       <path d="M8 5.14v14l11-7-11-7z" />
     </svg>
   )
 }
 
 export default function Card({ playlist, index }) {
-  const delay = `${0.1 + index * 0.08}s`
-
   return (
     <div
       className="playlist-card"
-      style={{ animationDelay: delay }}
+      style={{ animationDelay: `${0.05 + index * 0.06}s` }}
       onClick={() => window.open(playlist.url, '_blank')}
     >
-      <div className="playlist-card-title">{playlist.title}</div>
-      <button className="playlist-card-btn">
-        <PlayIcon />
-        Play
-      </button>
+      {playlist.thumb && (
+        <div className="playlist-card-thumb">
+          <img src={playlist.thumb} alt={playlist.title} loading="lazy" />
+          <div className="playlist-card-play-overlay">
+            <PlayIcon />
+          </div>
+        </div>
+      )}
+      <div className="playlist-card-info">
+        <div className="playlist-card-title">{playlist.title}</div>
+        <button className="playlist-card-btn">
+          <PlayIcon />
+          Play
+        </button>
+      </div>
     </div>
   )
 }

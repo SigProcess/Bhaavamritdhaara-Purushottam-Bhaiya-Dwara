@@ -2,88 +2,389 @@
   "collections": [
     {
       "id": "anand-pranami",
-      "title": "Anand Pranami Bhajans",
+      "title": "Anand Pranami Bhajans part 1-13",
       "playlists": [
-        { "id": 1, "title": "Anand Pranami 13", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1brovn9jKAndOixHYCu4ZLD" },
-        { "id": 2, "title": "Anand Pranami 12", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adwEkF_ib_6U2LkZPmFSen" },
-        { "id": 3, "title": "Anand Pranami 11", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yt1Vh4XGQxieiFATxOeGdl" },
-        { "id": 4, "title": "Anand Pranami 10", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZEWK_i9GM-hhlfr5CusPdr" },
-        { "id": 5, "title": "Anand Pranami 9", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aJibZjtm1_4ksVfhmEDH9v" },
-        { "id": 6, "title": "Anand Pranami 8", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZUzO0EZIQLWeU3viqNUnp_" },
-        { "id": 7, "title": "Anand Pranami 7", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b_yI8tWH2pTjAwDdovOftp" },
-        { "id": 8, "title": "Anand Pranami 5", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bcYaetCvyHL4dFYEn_7vy4" },
-        { "id": 9, "title": "Anand Pranami 4", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a7hUMOW903-v-qmJXxCqVT" },
-        { "id": 10, "title": "Anand Pranami 3", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bxn8XAdVsAxU_QzCWSFCQe" },
-        { "id": 11, "title": "Anand Pranami 2", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adbAmj-Xq-EZuPRoLH6fUh" },
-        { "id": 12, "title": "Anand Pranami 1", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YegHY-YtvXbW35YA9HvBB5" },
-        { "id": 13, "title": "Aanand Pranami Bhajans", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aCZ-ZeGw5VtpOzRk0iVoeD" },
-        { "id": 14, "title": "Anand Pranami Bhajans (Set A)", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YzVj4weYumjoIU1U-0zSGn" },
-        { "id": 15, "title": "Anand Pranami Bhajans (Set B)", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Z8SzRAsbxzkDTi1C2JOP7U" }
+        {
+          "id": 1,
+          "title": "Anand Pranami 13",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1brovn9jKAndOixHYCu4ZLD",
+          "thumb": "https://img.youtube.com/vi/vokyaFhvtXs/mqdefault.jpg"
+        },
+        {
+          "id": 2,
+          "title": "Anand Pranami 12",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adwEkF_ib_6U2LkZPmFSen",
+          "thumb": "https://img.youtube.com/vi/vomkImvHJhM/mqdefault.jpg"
+        },
+        {
+          "id": 3,
+          "title": "Anand Pranami 11",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yt1Vh4XGQxieiFATxOeGdl",
+          "thumb": "https://img.youtube.com/vi/awFgfv-RCbI/mqdefault.jpg"
+        },
+        {
+          "id": 4,
+          "title": "Anand Pranami 10",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZEWK_i9GM-hhlfr5CusPdr",
+          "thumb": "https://img.youtube.com/vi/uJ77bgUKuMk/mqdefault.jpg"
+        },
+        {
+          "id": 5,
+          "title": "Anand Pranami 9",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aJibZjtm1_4ksVfhmEDH9v",
+          "thumb": "https://img.youtube.com/vi/Hh8RMIwYnwM/mqdefault.jpg"
+        },
+        {
+          "id": 6,
+          "title": "Anand Pranami 8",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZUzO0EZIQLWeU3viqNUnp_",
+          "thumb": "https://img.youtube.com/vi/5RDG-IrhvLw/mqdefault.jpg"
+        },
+        {
+          "id": 7,
+          "title": "Anand Pranami 7",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b_yI8tWH2pTjAwDdovOftp",
+          "thumb": "https://img.youtube.com/vi/2OArBWcagDo/mqdefault.jpg"
+        },
+        {
+          "id": 8,
+          "title": "Anand Pranami 5",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bcYaetCvyHL4dFYEn_7vy4",
+          "thumb": "https://img.youtube.com/vi/kR9kgrXgJCQ/mqdefault.jpg"
+        },
+        {
+          "id": 9,
+          "title": "Anand Pranami 4",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a7hUMOW903-v-qmJXxCqVT",
+          "thumb": "https://img.youtube.com/vi/9msHoB2wEDI/mqdefault.jpg"
+        },
+        {
+          "id": 10,
+          "title": "Anand Pranami 3",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bxn8XAdVsAxU_QzCWSFCQe",
+          "thumb": "https://img.youtube.com/vi/ttjOjtw34gQ/mqdefault.jpg"
+        },
+        {
+          "id": 11,
+          "title": "Anand Pranami 2",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1adbAmj-Xq-EZuPRoLH6fUh",
+          "thumb": "https://img.youtube.com/vi/aB_UBbor1y4/mqdefault.jpg"
+        },
+        {
+          "id": 12,
+          "title": "Anand Pranami 1",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YegHY-YtvXbW35YA9HvBB5",
+          "thumb": "https://img.youtube.com/vi/AbT77HzeGcY/mqdefault.jpg"
+        }
       ]
     },
     {
       "id": "raaj-maan",
-      "title": "Raaj Maan Diaries",
+      "title": "Raaj Maan lekh",
       "playlists": [
-        { "id": 16, "title": "Raaj Maa First Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YMjahWF2w1mWu8Pq3wDrvt" },
-        { "id": 17, "title": "Raaj Maan ki Doosri Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bUu2X-RL_So5Ur_NISgB7y" },
-        { "id": 18, "title": "Raaj Maa Third and Fourth Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awsfXZtiTNL6kbNaDKgCz9" },
-        { "id": 19, "title": "Raaj Maan Fifth and Sixth Diary", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bZOQYs5XI4kvoERYheC-lp" }
+        {
+          "id": 16,
+          "title": "Raaj Maa First Diary",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YMjahWF2w1mWu8Pq3wDrvt",
+          "thumb": "https://img.youtube.com/vi/nCn5c4PmttQ/mqdefault.jpg"
+        },
+        {
+          "id": 17,
+          "title": "Raaj Maan ki Doosri Diary",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bUu2X-RL_So5Ur_NISgB7y",
+          "thumb": "https://img.youtube.com/vi/4Oypsjdxkcg/mqdefault.jpg"
+        },
+        {
+          "id": 18,
+          "title": "Raaj Maa Third and Fourth Diary",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awsfXZtiTNL6kbNaDKgCz9",
+          "thumb": "https://img.youtube.com/vi/pOFYkLAEDn0/mqdefault.jpg"
+        },
+        {
+          "id": 19,
+          "title": "Raaj Maan Fifth and Sixth Diary",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bZOQYs5XI4kvoERYheC-lp",
+          "thumb": "https://img.youtube.com/vi/tz7rLqQaafc/mqdefault.jpg"
+        },
+        {
+          "id": 29,
+          "title": "Sumir-Sumir Man Baaware",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YmmByMf8JuNdBSBR6Wh04D",
+          "thumb": "https://img.youtube.com/vi/xDikdfT04pM/mqdefault.jpg"
+        },
+        {
+          "id": 30,
+          "title": "Madhuban Hriday hai Mera",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bJ659qDxqWdK2GfB9yV5f8",
+          "thumb": "https://img.youtube.com/vi/8CgKzdtx1_Y/mqdefault.jpg"
+        }
       ]
     },
     {
       "id": "bibiji",
       "title": "Bibiji",
       "playlists": [
-        { "id": 20, "title": "Nandan Kaanan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YXuNhT4h0h2iUyCAccYDj0" }
+        {
+          "id": 20,
+          "title": "Nandan Kaanan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YXuNhT4h0h2iUyCAccYDj0",
+          "thumb": "https://img.youtube.com/vi/ej41JikC7xM/mqdefault.jpg"
+        }
       ]
     },
     {
       "id": "mausiji",
       "title": "Mausiji",
       "playlists": [
-        { "id": 21, "title": "Sulochana Mausi Ji ke Naye Lekh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aNZT8pWpxrS-Cc9ptH5d07" }
+        {
+          "id": 21,
+          "title": "Sulochana Mausi Ji ke Naye Lekh",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aNZT8pWpxrS-Cc9ptH5d07",
+          "thumb": "https://img.youtube.com/vi/CKVACHZR9gY/mqdefault.jpg"
+        },
+        {
+          "id": 28,
+          "title": "Bhhav-Kann",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZAaoMBrNS0yZj-6gk23orf",
+          "thumb": "https://img.youtube.com/vi/ZZBhDse2038/mqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "aanand-pushp",
+      "title": "Aanand Pushp",
+      "playlists": [
+        {
+          "id": 42,
+          "title": "Kaam Tera Naam Mera",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bOeJmSskRhG3N03ErR6-Qe",
+          "thumb": "https://img.youtube.com/vi/y7b4FbDmcHQ/mqdefault.jpg"
+        },
+        {
+          "id": 37,
+          "title": "Kaisa Bhool Bhulaiya",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZJpdr0Vdp8hJasI0Hc2lFv",
+          "thumb": "https://img.youtube.com/vi/q9rZOrA6ubg/mqdefault.jpg"
+        },
+        {
+          "id": 36,
+          "title": "Ye Kaliyaan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YhVARMFd6X1UbNi_MoekHH",
+          "thumb": "https://img.youtube.com/vi/1KUzgB6rl2o/mqdefault.jpg"
+        },
+        {
+          "id": 35,
+          "title": "Kya Doon?",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a_9O7UPw67Sy2Dcw9J02YE",
+          "thumb": "https://img.youtube.com/vi/3Wak1U1pc9A/mqdefault.jpg"
+        },
+        {
+          "id": 34,
+          "title": "Tera Saurabh",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YEWyEfUngLXS4tWXaMDSBx",
+          "thumb": "https://img.youtube.com/vi/S1ONGkogXTE/mqdefault.jpg"
+        },
+        {
+          "id": 55,
+          "title": "Prani ki Prerna",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y02kCK8neaDJPQK75Me0-S",
+          "thumb": "https://img.youtube.com/vi/uQigeJsxW9o/mqdefault.jpg"
+        },
+        {
+          "id": 26,
+          "title": "Dharm hai ya Shishtaachaar - Vishleshan by Purushottam Bhaiya",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y06TsBWQx0DHSqlXRE1Ku4",
+          "thumb": "https://img.youtube.com/vi/43nKhugoMcs/mqdefault.jpg"
+        },
+        {
+          "id": 33,
+          "title": "Anjaane Anmaane Bhagwaan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZP7HrekgQ-dHdg5-ZGrve1",
+          "thumb": "https://img.youtube.com/vi/0gmhHR3VWGM/mqdefault.jpg"
+        },
+        {
+          "id": 32,
+          "title": "Aaj Tera Saaj ya Raaj",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZBa-uMHkCvP8gO36KbGUhS",
+          "thumb": "https://img.youtube.com/vi/An34w7YXudg/mqdefault.jpg"
+        },
+        {
+          "id": 45,
+          "title": "Kyon?",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YZnfgh5vP70fLFeVTEzOU7",
+          "thumb": "https://img.youtube.com/vi/y7ZDEBrihI4/mqdefault.jpg"
+        },
+        {
+          "id": 58,
+          "title": "Man aur Tan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1blvm6VcYQ3arehSXVFZIbM",
+          "thumb": "https://img.youtube.com/vi/ongv0LO_5IQ/mqdefault.jpg"
+        },
+        {
+          "id": 31,
+          "title": "Digambar Tera Roop",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZHEJXJhBkUSs1F0b5FGLU1",
+          "thumb": "https://img.youtube.com/vi/fxbj8Fw-fHU/mqdefault.jpg"
+        },
+        {
+          "id": 59,
+          "title": "Mere Sathi",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b8NjhYioElAOki0mlYWvvD",
+          "thumb": "https://img.youtube.com/vi/Bz5r6xSyOEo/mqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "aanand-dhvani",
+      "title": "Aanand Dhvani",
+      "playlists": [
+        {
+          "id": 56,
+          "title": "Chintan Manan Dhvani",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yd8UP_WzIDPKqfQhVW3Yj-",
+          "thumb": "https://img.youtube.com/vi/XT7d7lxxAH8/mqdefault.jpg"
+        },
+        {
+          "id": 41,
+          "title": "Shanti ka Udgam",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YUZxS_OW-fQguDXtZztCP3",
+          "thumb": "https://img.youtube.com/vi/3FCZMXs8Qks/mqdefault.jpg"
+        },
+        {
+          "id": 47,
+          "title": "Aanand Kahan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yjs92shoY4Su8lpEFQIaZI",
+          "thumb": "https://img.youtube.com/vi/m2EOcEAYByk/mqdefault.jpg"
+        },
+        {
+          "id": 40,
+          "title": "Anant ka Chakra",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awTuPab4BHUWI7kFaogDok",
+          "thumb": "https://img.youtube.com/vi/Xsqelxyb81Y/mqdefault.jpg"
+        },
+        {
+          "id": 39,
+          "title": "Bhakti hi Kyon?",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aLme1rJfTWS7wkVEFF-iEm",
+          "thumb": "https://img.youtube.com/vi/XGWG6_GG7jw/mqdefault.jpg"
+        },
+        {
+          "id": 38,
+          "title": "Mukti Mahaan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZiAw-XEIooAWmnWCbSmTqA",
+          "thumb": "https://img.youtube.com/vi/r9zRZrKivfo/mqdefault.jpg"
+        },
+        {
+          "id": 54,
+          "title": "Karm-Gyaan ka Avsaan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ayD2wSaMyPoJwe4SGqAnUc",
+          "thumb": "https://img.youtube.com/vi/XbNQn-ZpHdI/mqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "aanand-tarang",
+      "title": "Aanand Tarang",
+      "playlists": [
+        {
+          "id": 51,
+          "title": "Meri Aakhon Mein Dekh. Meri Aakhon Se Dekh. Mujhe Dekh.",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YSSnETY6LwXjVYcR2EEHJU",
+          "thumb": "https://img.youtube.com/vi/-wTZY8IZNmc/mqdefault.jpg"
+        },
+        {
+          "id": 44,
+          "title": "Prakritik Bhajan",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZIkqFR_SF_S4r217ZvPfo4",
+          "thumb": "https://img.youtube.com/vi/pyrFtHaqZu0/mqdefault.jpg"
+        },
+        {
+          "id": 43,
+          "title": "Prakriti aur Swabhaav",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Zp0FN8lSCa-Z_QsaIiLeqI",
+          "thumb": "https://img.youtube.com/vi/Gt4EESRFsO8/mqdefault.jpg"
+        },
+        {
+          "id": 46,
+          "title": "Anaami ka Naam",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bnas1UyRdL-DockmUjS5yI",
+          "thumb": "https://img.youtube.com/vi/umdAv2zblEI/mqdefault.jpg"
+        },
+        {
+          "id": 52,
+          "title": "Bhav mein Abhaav",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YOgsjfy3Rj0-T8CdXprY1R",
+          "thumb": "https://img.youtube.com/vi/mvkE482NCb4/mqdefault.jpg"
+        }
+      ]
+    },
+    {
+      "id": "aanand-samadhi",
+      "title": "Aanand Samadhi",
+      "playlists": [
+        {
+          "id": 25,
+          "title": "Sukh Lekh Vishleshan by Purushottam Bhaiya",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZNkWj5X9UlTAM_9xGxZGql",
+          "thumb": "https://img.youtube.com/vi/Fa32l4TKIuQ/mqdefault.jpg"
+        },
+        {
+          "id": 50,
+          "title": "Dukh",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YwRRQsA6DRi4dyaj_DS8Zn",
+          "thumb": "https://img.youtube.com/vi/RD01yLFKolA/mqdefault.jpg"
+        },
+        {
+          "id": 49,
+          "title": "Samadhi",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZU4gebkbdKa8Prcdf31-co",
+          "thumb": "https://img.youtube.com/vi/rL_YPrxJVVk/mqdefault.jpg"
+        },
+        {
+          "id": 48,
+          "title": "Aanand",
+          "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y8S2NxJBg0EY3XA2fzqTHB",
+          "thumb": "https://img.youtube.com/vi/w2OErymgn2w/mqdefault.jpg"
+        }
       ]
     }
   ],
   "playlists": [
-    { "id": 22, "title": "Vani Vishleshan and Pravachan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y3IyLeKcg__-Z3BGOiwKwh" },
-    { "id": 23, "title": "Vani Vishleshan by Shri Purushottam Bhaiya, 2022", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZTwQUDcbwJNdtS42J63wd7" },
-    { "id": 24, "title": "Gyan Vani", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a9uHY5qXUnsVcS0RXWKNe2" },
-    { "id": 25, "title": "Sukh Lekh Vishleshan by Purushottam Bhaiya", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZNkWj5X9UlTAM_9xGxZGql" },
-    { "id": 26, "title": "Dharm hai ya Shishtaachaar", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y06TsBWQx0DHSqlXRE1Ku4" },
-    { "id": 27, "title": "Spiritual Bhajans", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Z9bVYZpUXi8KBmWP8TNd54" },
-    { "id": 28, "title": "Bhhav-Kann", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZAaoMBrNS0yZj-6gk23orf" },
-    { "id": 29, "title": "Sumir-Sumir Man Baaware", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YmmByMf8JuNdBSBR6Wh04D" },
-    { "id": 30, "title": "Madhuban Hriday hai Mera", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bJ659qDxqWdK2GfB9yV5f8" },
-    { "id": 31, "title": "Digambar Tera Roop", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZHEJXJhBkUSs1F0b5FGLU1" },
-    { "id": 32, "title": "Aaj Tera Saaj ya Raaj", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZBa-uMHkCvP8gO36KbGUhS" },
-    { "id": 33, "title": "Anjaane Anmaane Bhagwaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZP7HrekgQ-dHdg5-ZGrve1" },
-    { "id": 34, "title": "Tera Saurabh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YEWyEfUngLXS4tWXaMDSBx" },
-    { "id": 35, "title": "Kya Doon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a_9O7UPw67Sy2Dcw9J02YE" },
-    { "id": 36, "title": "Ye Kaliyaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YhVARMFd6X1UbNi_MoekHH" },
-    { "id": 37, "title": "Kaisa Bhool Bhulaiya", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZJpdr0Vdp8hJasI0Hc2lFv" },
-    { "id": 38, "title": "Mukti Mahaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZiAw-XEIooAWmnWCbSmTqA" },
-    { "id": 39, "title": "Bhakti hi Kyon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aLme1rJfTWS7wkVEFF-iEm" },
-    { "id": 40, "title": "Anant ka Chakra", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1awTuPab4BHUWI7kFaogDok" },
-    { "id": 41, "title": "Shanti ka Udgam", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YUZxS_OW-fQguDXtZztCP3" },
-    { "id": 42, "title": "Kaam Tera Naam Mera", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bOeJmSskRhG3N03ErR6-Qe" },
-    { "id": 43, "title": "Prakriti aur Swabhaav", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Zp0FN8lSCa-Z_QsaIiLeqI" },
-    { "id": 44, "title": "Prakritik Bhajan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZIkqFR_SF_S4r217ZvPfo4" },
-    { "id": 45, "title": "Kyon?", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YZnfgh5vP70fLFeVTEzOU7" },
-    { "id": 46, "title": "Anaami ka Naam", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1bnas1UyRdL-DockmUjS5yI" },
-    { "id": 47, "title": "Aanand Kahan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yjs92shoY4Su8lpEFQIaZI" },
-    { "id": 48, "title": "Aanand", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y8S2NxJBg0EY3XA2fzqTHB" },
-    { "id": 49, "title": "Samadhi", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZU4gebkbdKa8Prcdf31-co" },
-    { "id": 50, "title": "Dukh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YwRRQsA6DRi4dyaj_DS8Zn" },
-    { "id": 51, "title": "Meri Aakhon Mein Dekh", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YSSnETY6LwXjVYcR2EEHJU" },
-    { "id": 52, "title": "Bhav mein Abhaav", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1YOgsjfy3Rj0-T8CdXprY1R" },
-    { "id": 53, "title": "Bhaav-Yog", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aa1-UzSax9I3cm0ZY6rDRq" },
-    { "id": 54, "title": "Karm-Gyan ka Avsaan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ayD2wSaMyPoJwe4SGqAnUc" },
-    { "id": 55, "title": "Prani ki Prerna", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y02kCK8neaDJPQK75Me0-S" },
-    { "id": 56, "title": "Chintan Manan Dhvani", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Yd8UP_WzIDPKqfQhVW3Yj-" },
-    { "id": 57, "title": "Aanand Path", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aRm1N715TynmDN1KYnh4kx" },
-    { "id": 58, "title": "Man aur Tan", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1blvm6VcYQ3arehSXVFZIbM" },
-    { "id": 59, "title": "Mere Sathi", "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1b8NjhYioElAOki0mlYWvvD" }
+    {
+      "id": 22,
+      "title": "Vani Vishleshan and Pravachan",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Y3IyLeKcg__-Z3BGOiwKwh",
+      "thumb": "https://img.youtube.com/vi/h4qv1KgKKM8/mqdefault.jpg"
+    },
+    {
+      "id": 23,
+      "title": "Vani Vishleshan by Shri Purushottam Bhaiya, 2022",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1ZTwQUDcbwJNdtS42J63wd7",
+      "thumb": "https://img.youtube.com/vi/kjvkE_bwymA/mqdefault.jpg"
+    },
+    {
+      "id": 24,
+      "title": "Gyan Vani",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1a9uHY5qXUnsVcS0RXWKNe2",
+      "thumb": "https://img.youtube.com/vi/DJjkF6_POjE/mqdefault.jpg"
+    },
+    {
+      "id": 27,
+      "title": "Spiritual Bhajans",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1Z9bVYZpUXi8KBmWP8TNd54",
+      "thumb": "https://img.youtube.com/vi/nytM0ewdXiY/mqdefault.jpg"
+    },
+    {
+      "id": 53,
+      "title": "Bhaav-Yog",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aa1-UzSax9I3cm0ZY6rDRq",
+      "thumb": "https://img.youtube.com/vi/W3qHsrWnkAI/mqdefault.jpg"
+    },
+    {
+      "id": 57,
+      "title": "Aanand Path",
+      "url": "https://www.youtube.com/playlist?list=PLKsNVSr36o1aRm1N715TynmDN1KYnh4kx",
+      "thumb": "https://img.youtube.com/vi/qK0F-rmOSgA/mqdefault.jpg"
+    }
   ]
 }

@@ -14,14 +14,16 @@ export default function PlaylistSections() {
 
   return (
     <div className="sections-container">
-      <div className="section-label">Collections</div>
+      <div className="section-heading">Collections</div>
+      <div className="section-subheading">Curated series of bhajans and pravachans</div>
       <div className="collections-grid">
-        {data.collections.map((col) => (
+        {data.collections.map((col, i) => (
           <CollectionCardButton
             key={col.id}
             collection={col}
             isExpanded={expandedId === col.id}
             onToggle={() => handleToggle(col.id)}
+            index={i}
           />
         ))}
       </div>
@@ -29,18 +31,20 @@ export default function PlaylistSections() {
         <CollectionExpanded
           key={expandedCollection.id}
           collection={expandedCollection}
-          isExpanded={true}
         />
       )}
 
-      <div className="playlists-section">
-        <div className="section-label">All Playlists</div>
-        <div className="playlists-grid">
-          {data.playlists.map((p, i) => (
-            <Card key={p.id} playlist={p} index={i} />
-          ))}
+      {data.playlists.length > 0 && (
+        <div className="playlists-section">
+          <div className="section-heading">More Playlists</div>
+          <div className="section-subheading">Individual devotional playlists</div>
+          <div className="playlists-grid">
+            {data.playlists.map((p, i) => (
+              <Card key={p.id} playlist={p} index={i} />
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
