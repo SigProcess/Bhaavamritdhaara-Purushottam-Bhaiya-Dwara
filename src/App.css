@@ -56,7 +56,41 @@ nav{
 .nav-right{
   font-style:italic;color:var(--text-muted);font-size:0.85rem;letter-spacing:0.03em;
 }
-@media(max-width:600px){.nav-right{display:none}}
+.nav-right-wrap{
+  display:flex;align-items:center;gap:8px;
+}
+.nav-tab{
+  border:1px solid rgba(61,43,31,0.1);
+  background:rgba(255,255,255,0.6);
+  color:var(--earth);
+  text-decoration:none;
+  border-radius:999px;
+  padding:8px 14px;
+  font-family:'EB Garamond',serif;
+  font-size:0.8rem;
+  letter-spacing:0.04em;
+  cursor:pointer;
+  transition:all 0.2s ease;
+}
+.nav-tab:hover{
+  border-color:rgba(232,135,43,0.45);
+  background:rgba(232,135,43,0.1);
+}
+.nav-tab.active{
+  background:linear-gradient(135deg,var(--saffron),var(--crimson));
+  border-color:transparent;
+  color:#fff;
+  box-shadow:0 6px 18px rgba(184,51,66,0.22);
+}
+@media(max-width:760px){
+  .nav-right-wrap{
+    gap:6px;
+  }
+  .nav-tab{
+    padding:7px 11px;
+    font-size:0.72rem;
+  }
+}
 
 /* === HERO BANNER === */
 .hero{
@@ -336,6 +370,165 @@ nav{
   background:linear-gradient(135deg,rgba(232,135,43,0.18),rgba(184,51,66,0.1));
 }
 .playlist-card-btn svg{width:12px;height:12px;color:var(--saffron);flex-shrink:0}
+
+/* === BHAJANS PAGE === */
+.bhajans-page{
+  max-width:1200px;
+  margin:0 auto;
+  padding:100px clamp(1.5rem,5vw,4rem) 4rem;
+  position:relative;
+  z-index:10;
+  animation:fadeIn 0.5s ease both;
+}
+.bhajans-header{
+  margin-bottom:1.5rem;
+}
+.bhajans-kicker{
+  display:inline-block;
+  font-size:0.65rem;
+  letter-spacing:0.28em;
+  text-transform:uppercase;
+  color:var(--saffron-deep);
+  background:rgba(232,135,43,0.15);
+  border-radius:999px;
+  padding:6px 12px;
+  margin-bottom:0.85rem;
+}
+.bhajans-title{
+  font-family:'Bodoni Moda',serif;
+  font-size:clamp(1.8rem,4vw,2.8rem);
+  color:var(--earth);
+  line-height:1.15;
+}
+.bhajans-desc{
+  margin-top:0.55rem;
+  color:var(--text-secondary);
+  max-width:700px;
+  line-height:1.6;
+}
+.bhajans-tools{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  margin-bottom:1rem;
+}
+.bhajans-search{
+  width:min(560px,100%);
+  border:1px solid rgba(61,43,31,0.15);
+  border-radius:12px;
+  padding:12px 14px;
+  font-family:'EB Garamond',serif;
+  font-size:1rem;
+  color:var(--text);
+  background:rgba(255,255,255,0.75);
+}
+.bhajans-search:focus{
+  outline:none;
+  border-color:var(--saffron);
+  box-shadow:0 0 0 4px rgba(232,135,43,0.12);
+}
+.bhajans-count{
+  font-size:0.82rem;
+  color:var(--text-muted);
+  letter-spacing:0.08em;
+  text-transform:uppercase;
+}
+.bhajans-list{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:10px;
+}
+.bhajan-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:1rem;
+  background:var(--warm-white);
+  border:1px solid rgba(61,43,31,0.08);
+  border-radius:12px;
+  padding:13px 14px;
+  transition:all 0.2s ease;
+}
+.bhajan-row:hover{
+  border-color:rgba(232,135,43,0.35);
+  box-shadow:0 10px 28px rgba(61,43,31,0.06);
+}
+.bhajan-meta{
+  min-width:0;
+}
+.bhajan-name{
+  font-family:'Bodoni Moda',serif;
+  font-size:0.93rem;
+  color:var(--earth);
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.bhajan-file{
+  margin-top:3px;
+  color:var(--text-muted);
+  font-size:0.74rem;
+  letter-spacing:0.03em;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  max-width:100%;
+}
+.bhajan-actions{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-shrink:0;
+}
+.bhajan-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:9px;
+  border:1px solid transparent;
+  background:linear-gradient(135deg,var(--saffron),var(--crimson));
+  color:#fff;
+  text-decoration:none;
+  font-size:0.78rem;
+  letter-spacing:0.06em;
+  text-transform:uppercase;
+  padding:8px 11px;
+  transition:all 0.2s ease;
+}
+.bhajan-link.secondary{
+  background:transparent;
+  color:var(--earth-mid);
+  border-color:rgba(61,43,31,0.14);
+}
+.bhajan-link:hover{
+  transform:translateY(-1px);
+  box-shadow:0 8px 20px rgba(184,51,66,0.2);
+}
+.bhajan-link.secondary:hover{
+  box-shadow:none;
+  border-color:rgba(232,135,43,0.45);
+  color:var(--saffron-deep);
+}
+@media(max-width:760px){
+  .bhajans-page{
+    padding-top:86px;
+  }
+  .bhajans-tools{
+    flex-direction:column;
+    align-items:stretch;
+  }
+  .bhajan-row{
+    flex-direction:column;
+    align-items:flex-start;
+  }
+  .bhajan-actions{
+    width:100%;
+  }
+  .bhajan-link{
+    flex:1;
+  }
+}
 
 /* === FOOTER === */
 footer{
