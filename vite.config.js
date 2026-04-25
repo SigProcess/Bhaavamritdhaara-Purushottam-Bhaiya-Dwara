@@ -30,6 +30,8 @@ export default defineConfig({
         cleanupOutdatedCaches: true,
         clientsClaim: true,
         skipWaiting: true,
+        // Keep app-shell routing for SPA pages only; let PDFs and static files load directly.
+        navigateFallbackDenylist: [/^\/bhajan-pdfs\//, /\.[^/]+$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/img\.youtube\.com\/.*/i,
