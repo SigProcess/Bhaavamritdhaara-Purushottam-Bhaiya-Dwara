@@ -48,7 +48,8 @@ export default function BhajansPage() {
       <div className="bhajans-list" role="list">
         {filteredFiles.map((file) => {
           const title = formatBhajanName(file)
-          const href = `/bhajans/${file}`
+          const encodedFilePath = file.replaceAll('%', '%25')
+          const href = `/bhajan-pdfs/${encodedFilePath}`
 
           return (
             <article className="bhajan-row" role="listitem" key={file}>
