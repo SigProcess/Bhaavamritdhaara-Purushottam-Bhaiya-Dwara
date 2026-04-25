@@ -12,7 +12,7 @@ body{
   min-height:100vh;background:var(--ivory);color:var(--text);
   font-family:'Lora',Georgia,serif;
   -webkit-font-smoothing:antialiased;
-  font-size:17px;
+  font-size:20px;
 }
 #root{min-height:100vh}
 
@@ -144,18 +144,18 @@ nav{
   background:rgba(232,135,43,0.15);padding:5px 14px;border-radius:2px;
 }
 .hero-title{
-  font-family:'Bodoni Moda',serif;
-  font-size:clamp(2rem,5vw,3.6rem);font-weight:700;
-  color:#fff;line-height:1.1;margin-bottom:0.2rem;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.8rem,6.5vw,5rem);font-weight:700;
+  color:#fff;line-height:1.05;margin-bottom:0.2rem;
 }
 .hero-subtitle{
-  font-family:'Bodoni Moda',serif;
-  font-size:clamp(1rem,2.2vw,1.5rem);font-weight:400;font-style:italic;
+  font-family:'Playfair Display',serif;
+  font-size:clamp(1.3rem,2.8vw,2rem);font-weight:400;font-style:italic;
   color:var(--saffron-light);margin-bottom:0.6rem;
 }
 .hero-desc{
-  font-size:clamp(0.9rem,1.4vw,1.05rem);color:rgba(255,255,255,0.7);
-  line-height:1.7;max-width:440px;
+  font-size:clamp(1.05rem,1.6vw,1.3rem);color:rgba(255,255,255,0.75);
+  line-height:1.75;max-width:480px;
 }
 @media(max-width:600px){
   .hero-banner{min-height:360px}
@@ -187,11 +187,11 @@ nav{
   position:relative;z-index:10;
 }
 .section-heading{
-  font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:600;
+  font-family:'Playfair Display',serif;font-size:2.1rem;font-weight:700;
   color:var(--earth);margin-bottom:0.3rem;
 }
 .section-subheading{
-  font-size:0.85rem;color:var(--text-muted);letter-spacing:0.03em;
+  font-size:1rem;color:var(--text-muted);letter-spacing:0.03em;
   margin-bottom:2rem;
 }
 
@@ -241,7 +241,7 @@ nav{
   padding:14px 16px 16px;
 }
 .collection-card-title{
-  font-family:'Playfair Display',serif;font-size:0.98rem;font-weight:600;
+  font-family:'Playfair Display',serif;font-size:1.15rem;font-weight:600;
   color:var(--earth);line-height:1.35;margin-bottom:4px;
 }
 .collection-card-count{
@@ -356,7 +356,7 @@ nav{
   padding:14px 14px 16px;
 }
 .playlist-card-title{
-  font-family:'Playfair Display',serif;font-size:0.95rem;font-weight:600;
+  font-family:'Playfair Display',serif;font-size:1.1rem;font-weight:600;
   color:var(--earth);line-height:1.35;margin-bottom:10px;
 }
 .playlist-card-btn{
