@@ -24,6 +24,7 @@ export default function BhajansPage() {
   }, [query])
 
   return (
+    <div className="bhajans-page-bg">
     <section className="bhajans-page" aria-label="Bhajans PDFs">
       <div className="bhajans-header">
         <p className="bhajans-kicker">Bhavnirjharini Collection</p>
@@ -70,5 +71,6 @@ export default function BhajansPage() {
         })}
       </div>
     </section>
+    </div>
   )
 }
