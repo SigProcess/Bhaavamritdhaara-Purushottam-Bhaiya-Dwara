@@ -1,3 +1,5 @@
+import { useEffect } from 'react'
+
 function ExternalLinkIcon() {
   return (
     <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -11,44 +13,50 @@ function ExternalLinkIcon() {
 export default function FacebookPostExpanded({ post, onClose }) {
   const commentScreenshots = post.commentScreenshots || []
 
+  useEffect(() => {
+    const handleKey = (e) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', handleKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
   return (
-    <div className="fb-expanded-wrap">
-      <div className="fb-expanded">
-        <div className="fb-expanded-header">
-          <div className="fb-expanded-title">{post.title}</div>
-          <button className="fb-expanded-close" onClick={onClose} aria-label="Close">
-            ✕
-          </button>
+    <div className="fb-lightbox" onClick={onClose}>
+      <div className="fb-lightbox-content" onClick={(e) => e.stopPropagation()}>
+        <button className="fb-lightbox-close" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
+
+        <div className="fb-lightbox-scroll">
+          <img className="fb-lightbox-img" src={post.thumb} alt={post.title} />
+
+          {commentScreenshots.length > 0 && (
+            <div className="fb-lightbox-comments">
+              <div className="fb-lightbox-comments-label">Replies by Purushottam Bhaiya</div>
+              {commentScreenshots.map((src, i) => (
+                <img
+                  key={i}
+                  className="fb-lightbox-comment-img"
+                  src={src}
+                  alt={`Comment ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
+
+          <a
+            className="fb-lightbox-link"
+            href={post.url}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <ExternalLinkIcon />
+            Open on Facebook
+          </a>
         </div>
-
-        <div className="fb-expanded-post-img">
-          <img src={post.thumb} alt={post.title} loading="lazy" />
-        </div>
-
-        {commentScreenshots.length > 0 && (
-          <div className="fb-expanded-comments">
-            <div className="fb-expanded-comments-label">Replies by Purushottam Bhaiya</div>
-            {commentScreenshots.map((src, i) => (
-              <img
-                key={i}
-                className="fb-expanded-comment-img"
-                src={src}
-                alt={`Comment ${i + 1}`}
-                loading="lazy"
-              />
-            ))}
-          </div>
-        )}
-
-        <a
-          className="fb-expanded-link"
-          href={post.url}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <ExternalLinkIcon />
-          Open on Facebook
-        </a>
       </div>
     </div>
   )

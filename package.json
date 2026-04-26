@@ -15,7 +15,8 @@
     "facebook:login": "node scripts/screenshot-facebook-posts.js --login-only",
     "facebook:collect": "node scripts/screenshot-facebook-posts.js --collect",
     "facebook:screenshot": "node scripts/screenshot-facebook-posts.js --screenshot",
-    "facebook:all": "node scripts/screenshot-facebook-posts.js --all"
+    "facebook:all": "node scripts/screenshot-facebook-posts.js --all",
+    "fetch:playlists": "node scripts/fetch-playlist-videos.js"
   },
   "dependencies": {
     "react": "^18.2.0",

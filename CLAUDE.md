@@ -32,11 +32,15 @@ To add/reorganize playlists, edit the JSON only — no component changes needed.
 
 `App` → `Nav`, `Hero`, `PlaylistSections`, `Footer`
 
-`PlaylistSections` is the main content area: it renders `CollectionCardButton` cards in a grid. Clicking a collection toggles `CollectionExpanded` which shows sub-playlists with thumbnails. Standalone playlists render as `Card` components below.
+`PlaylistSections` is the main content area: it renders `CollectionCardButton` cards in a grid. Clicking a collection or playlist opens a fullscreen `YouTubeLightbox` overlay. Collections show a grid of sub-playlists; selecting one shows an embedded YouTube player with a scrollable video list below. Standalone playlists open directly to the player view.
 
 ### Static assets
 
 Images and video are in `public/` (`bhaiya-portrait.jpg`, `bhaiya-altar.jpg`, `bg-video.mp4`, `favicon.svg`). Referenced via absolute paths (e.g., `/bhaiya-portrait.jpg`).
+
+### Playlist video data
+
+Video IDs and titles for all playlists are pre-fetched and stored in `src/data/playlistVideos.json`, keyed by YouTube playlist ID (the `list` query param). To refresh: `npm run fetch:playlists` (uses yt-dlp). Pass `--force` to re-fetch all. Run this after adding new playlists to `playlists.json`.
 
 ### Thumbnail convention
 

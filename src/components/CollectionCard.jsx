@@ -40,7 +40,7 @@ export function CollectionCardButton({ collection, isExpanded, onToggle, index }
   )
 }
 
-export function CollectionExpanded({ collection }) {
+export function CollectionExpanded({ collection, onPlaylistClick }) {
   return (
     <div className="collection-expanded-wrap">
       <div className="collection-expanded">
@@ -50,7 +50,7 @@ export function CollectionExpanded({ collection }) {
             <button
               key={p.id}
               className="sub-playlist-btn"
-              onClick={() => window.open(p.url, '_blank')}
+              onClick={() => onPlaylistClick ? onPlaylistClick(p) : window.open(p.url, '_blank')}
             >
               {p.thumb && (
                 <img className="sub-playlist-thumb" src={p.thumb} alt={p.title} loading="lazy" />

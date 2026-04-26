@@ -36,6 +36,10 @@ async function writeJson(filePath, data) {
 }
 
 async function launchBrowser() {
+  // Remove stale lock file left by a previous crashed session
+  const lockFile = path.join(userDataDir, 'SingletonLock')
+  try { await fs.unlink(lockFile) } catch { /* doesn't exist */ }
+
   const context = await chromium.launchPersistentContext(userDataDir, {
     headless: false,
     viewport: { width: 1280, height: 900 },
@@ -143,27 +147,51 @@ async function collectPostUrls(page) {
   return existing
 }
 
+function stripCommentId(url) {
+  try {
+    const u = new URL(url)
+    u.searchParams.delete('comment_id')
+    return u.toString()
+  } catch {
+    return url
+  }
+}
+
 async function screenshotPost(page, postUrl, postIndex) {
   const postId = `fb-post-${String(postIndex).padStart(3, '0')}`
   const thumbPath = path.join(thumbsDir, `${postId}.jpg`)
 
-  await page.goto(postUrl, { waitUntil: 'domcontentloaded' })
-  await randomDelay(2000, 4000)
+  // Strip comment_id so we always land on the main post, not a specific comment
+  const cleanUrl = stripCommentId(postUrl)
+  const isPhotoUrl = cleanUrl.includes('/photo')
 
-  // Close any popups/overlays
-  try {
-    const closeBtn = page.locator('[aria-label="Close"]').first()
-    if (await closeBtn.isVisible({ timeout: 1000 })) {
-      await closeBtn.click()
-      await randomDelay(500, 1000)
-    }
-  } catch { /* no popup */ }
+  await page.goto(cleanUrl, { waitUntil: 'domcontentloaded', timeout: 15000 })
+  await randomDelay(3000, 5000)
 
-  // Screenshot the main post content
-  const postContent = page.locator('[role="article"]').first()
+  // Close any popups/overlays (login nag, cookie consent, etc.)
+  // But NOT the close button on the photo viewer or post dialog — those dismiss the content
+  for (const label of ['Decline optional cookies', 'Not now']) {
+    try {
+      const btn = page.locator(`[aria-label="${label}"]`).first()
+      if (await btn.isVisible({ timeout: 800 })) {
+        await btn.click()
+        await randomDelay(300, 600)
+      }
+    } catch { /* no popup */ }
+  }
+
+  // Wait for meaningful content to appear (image or text)
   try {
-    await postContent.waitFor({ timeout: 8000 })
-    await postContent.screenshot({ path: thumbPath, type: 'jpeg', quality: 85 })
+    await page.locator('img[src*="scontent"], img[data-visualcompletion="media-vc-image"], [dir="auto"]').first().waitFor({ timeout: 10000 })
+  } catch {
+    console.log(`  [POST] ${postId} SKIPPED: page content did not load`)
+    return null
+  }
+
+  // Take a viewport screenshot — Facebook layouts vary too much (photo viewer,
+  // post dialog, feed post) to reliably target a specific element
+  try {
+    await page.screenshot({ path: thumbPath, type: 'jpeg', quality: 85 })
     console.log(`  [POST] ${postId} -> ${path.basename(thumbPath)}`)
   } catch (err) {
     console.log(`  [POST] ${postId} FAILED: ${err.message}`)
@@ -173,12 +201,7 @@ async function screenshotPost(page, postUrl, postIndex) {
   // Extract post title from text content
   let title = ''
   try {
-    title = await postContent.evaluate((el) => {
-      const textEl = el.querySelector('[data-ad-comet-preview="message"]') ||
-                     el.querySelector('[data-ad-preview="message"]') ||
-                     el.querySelector('[dir="auto"]')
-      return textEl ? textEl.textContent.trim() : ''
-    })
+    title = await page.locator('[role="dialog"] [dir="auto"], [role="main"] [dir="auto"]').first().evaluate((el) => el.textContent.trim())
   } catch { /* no text */ }
   title = (title || 'Post by Purushottam Sharma').slice(0, 80)
 
@@ -305,9 +328,15 @@ async function screenshotAllPosts(page) {
     console.log(`\n[${postIndex}/${entries.length}] ${entry.postUrl}`)
 
     try {
-      // Check for rate-limiting / CAPTCHA
-      const pageContent = await page.content()
-      if (pageContent.includes('Please try again later') || pageContent.includes('checkpoint')) {
+      // Check for rate-limiting / CAPTCHA (only match actual block pages, not normal content)
+      const isBlocked = await page.evaluate(() => {
+        const url = window.location.href
+        const title = document.title.toLowerCase()
+        return url.includes('/checkpoint/') ||
+          title.includes('security check') ||
+          title.includes('please try again')
+      })
+      if (isBlocked) {
         console.log('\n=== Rate limit or CAPTCHA detected! ===')
         console.log('Pausing. Resolve in the browser, then press Enter to continue...\n')
         failed.push({ postUrl: entry.postUrl, reason: 'rate-limited', at: new Date().toISOString() })
