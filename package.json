@@ -6,7 +6,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "facebook:extract": "node scripts/extract-facebook-post-urls.js",
+    "facebook:autofill": "node scripts/autofill-facebook-thumbnail-filenames.js",
+    "facebook:thumbs": "node scripts/process-facebook-thumbnails.js",
+    "facebook:import": "node scripts/import-facebook-posts-from-csv.js",
+    "facebook:sync": "npm run facebook:autofill && npm run facebook:thumbs && npm run facebook:import",
+    "facebook:login": "node scripts/screenshot-facebook-posts.js --login-only",
+    "facebook:collect": "node scripts/screenshot-facebook-posts.js --collect",
+    "facebook:screenshot": "node scripts/screenshot-facebook-posts.js --screenshot",
+    "facebook:all": "node scripts/screenshot-facebook-posts.js --all"
   },
   "dependencies": {
     "react": "^18.2.0",
@@ -14,6 +23,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.2.1",
+    "playwright": "^1.59.1",
     "sharp": "^0.34.5",
     "vite": "^5.4.2",
     "vite-plugin-pwa": "^1.2.0"
