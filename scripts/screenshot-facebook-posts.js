@@ -334,7 +334,93 @@ async function screenshotAllPosts(page) {
   return results
 }
 
-// Phase 3 will be added in the next task
+function toCsvLine(values) {
+  return values
+    .map((value) => {
+      const str = String(value ?? '')
+      if (/[,"\n|]/.test(str)) {
+        return `"${str.replace(/"/g, '""')}"`
+      }
+      return str
+    })
+    .join(',')
+}
+
+async function updateDataFiles(results) {
+  if (results.length === 0) {
+    console.log('\nNo new results to write.')
+    return
+  }
+
+  const csvHeaders = [
+    'id', 'title', 'post_link', 'thumbnail_file',
+    'comment_screenshot_files', 'category', 'tags', 'date', 'visible', 'sort_order',
+  ]
+
+  // Read existing CSV rows (if any)
+  let existingRows = []
+  try {
+    const raw = await fs.readFile(csvPath, 'utf8')
+    const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean)
+    if (lines.length > 1) {
+      const headers = lines[0].split(',').map((h) => h.trim())
+      existingRows = lines.slice(1).map((line) => {
+        const cells = line.split(',').map((c) => c.trim())
+        const row = {}
+        headers.forEach((h, i) => { row[h] = cells[i] || '' })
+        return row
+      })
+    }
+  } catch { /* no existing CSV */ }
+
+  const existingIds = new Set(existingRows.map((r) => r.id))
+
+  for (const result of results) {
+    if (existingIds.has(result.id)) continue
+
+    existingRows.push({
+      id: result.id,
+      title: result.title,
+      post_link: result.url,
+      thumbnail_file: result.thumbFile,
+      comment_screenshot_files: result.commentFiles.join('|'),
+      category: '',
+      tags: '',
+      date: result.date,
+      visible: 'yes',
+      sort_order: String(existingRows.length + 1),
+    })
+  }
+
+  const csvOutput = [
+    toCsvLine(csvHeaders),
+    ...existingRows.map((row) => toCsvLine(csvHeaders.map((h) => row[h] || ''))),
+  ].join('\n') + '\n'
+
+  await fs.writeFile(csvPath, csvOutput, 'utf8')
+  console.log(`CSV updated: ${existingRows.length} total rows.`)
+
+  // Generate JSON
+  const jsonEntries = existingRows.map((row) => ({
+    id: row.id,
+    title: row.title,
+    url: row.post_link,
+    thumb: row.thumbnail_file ? `/facebook-posts/thumbs/${row.thumbnail_file}` : '',
+    commentScreenshots: (row.comment_screenshot_files || '')
+      .split('|')
+      .filter(Boolean)
+      .map((f) => `/facebook-posts/comments/${f}`),
+    category: row.category || '',
+    tags: (row.tags || '').split('|').map((t) => t.trim()).filter(Boolean),
+    date: row.date,
+    visible: ['yes', 'true', '1', 'y'].includes((row.visible || '').toLowerCase()),
+    sortOrder: Number.parseInt(row.sort_order, 10) || 9999,
+  }))
+
+  jsonEntries.sort((a, b) => a.sortOrder - b.sortOrder)
+  await writeJson(jsonPath, jsonEntries)
+  console.log(`JSON updated: ${jsonEntries.length} entries.`)
+}
 
 async function main() {
   const args = process.argv.slice(2)
@@ -360,6 +446,7 @@ async function main() {
     if (mode === '--screenshot' || mode === '--all') {
       const results = await screenshotAllPosts(page)
       console.log(`\nScreenshot phase complete. ${results.length} new posts captured.`)
+      await updateDataFiles(results)
     }
   } finally {
     await context.close()
