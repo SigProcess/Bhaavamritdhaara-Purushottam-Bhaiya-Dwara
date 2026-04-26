@@ -6,12 +6,20 @@ function PlayIcon() {
   )
 }
 
-export default function Card({ playlist, index }) {
+export default function Card({ playlist, index, ctaLabel = 'Play', onClick }) {
+  const handleClick = () => {
+    if (onClick) {
+      onClick()
+    } else {
+      window.open(playlist.url, '_blank')
+    }
+  }
+
   return (
     <div
       className="playlist-card"
       style={{ animationDelay: `${0.05 + index * 0.06}s` }}
-      onClick={() => window.open(playlist.url, '_blank')}
+      onClick={handleClick}
     >
       {playlist.thumb && (
         <div className="playlist-card-thumb">
@@ -25,7 +33,7 @@ export default function Card({ playlist, index }) {
         <div className="playlist-card-title">{playlist.title}</div>
         <button className="playlist-card-btn">
           <PlayIcon />
-          Play
+          {ctaLabel}
         </button>
       </div>
     </div>
