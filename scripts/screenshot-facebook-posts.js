@@ -143,7 +143,198 @@ async function collectPostUrls(page) {
   return existing
 }
 
-// Phase 2 and Phase 3 will be added in subsequent tasks
+async function screenshotPost(page, postUrl, postIndex) {
+  const postId = `fb-post-${String(postIndex).padStart(3, '0')}`
+  const thumbPath = path.join(thumbsDir, `${postId}.jpg`)
+
+  await page.goto(postUrl, { waitUntil: 'domcontentloaded' })
+  await randomDelay(2000, 4000)
+
+  // Close any popups/overlays
+  try {
+    const closeBtn = page.locator('[aria-label="Close"]').first()
+    if (await closeBtn.isVisible({ timeout: 1000 })) {
+      await closeBtn.click()
+      await randomDelay(500, 1000)
+    }
+  } catch { /* no popup */ }
+
+  // Screenshot the main post content
+  const postContent = page.locator('[role="article"]').first()
+  try {
+    await postContent.waitFor({ timeout: 8000 })
+    await postContent.screenshot({ path: thumbPath, type: 'jpeg', quality: 85 })
+    console.log(`  [POST] ${postId} -> ${path.basename(thumbPath)}`)
+  } catch (err) {
+    console.log(`  [POST] ${postId} FAILED: ${err.message}`)
+    return null
+  }
+
+  // Extract post title from text content
+  let title = ''
+  try {
+    title = await postContent.evaluate((el) => {
+      const textEl = el.querySelector('[data-ad-comet-preview="message"]') ||
+                     el.querySelector('[data-ad-preview="message"]') ||
+                     el.querySelector('[dir="auto"]')
+      return textEl ? textEl.textContent.trim() : ''
+    })
+  } catch { /* no text */ }
+  title = (title || 'Post by Purushottam Sharma').slice(0, 80)
+
+  // Extract post date
+  let date = ''
+  try {
+    date = await page.evaluate(() => {
+      const timeEl = document.querySelector('abbr[data-utime]')
+      if (timeEl) {
+        const ts = Number(timeEl.getAttribute('data-utime')) * 1000
+        return new Date(ts).toISOString().split('T')[0]
+      }
+      return ''
+    })
+  } catch { /* no date */ }
+  if (!date) {
+    date = new Date().toISOString().split('T')[0]
+  }
+
+  // Find and screenshot Purushottam Sharma's comments
+  const commentScreenshots = []
+
+  try {
+    // Scroll down to load comments
+    await page.evaluate(() => window.scrollBy(0, window.innerHeight))
+    await randomDelay(1500, 2500)
+
+    // Expand "View more comments" links
+    for (let i = 0; i < 10; i++) {
+      const viewMore = page.locator('text=/View more comments|View all .* comments/i').first()
+      if (await viewMore.isVisible({ timeout: 1000 })) {
+        await viewMore.click()
+        await randomDelay(1000, 2000)
+      } else {
+        break
+      }
+    }
+
+    // Expand reply threads
+    for (let i = 0; i < 20; i++) {
+      const viewReplies = page.locator('text=/View .* repl/i').first()
+      if (await viewReplies.isVisible({ timeout: 500 })) {
+        await viewReplies.click()
+        await randomDelay(800, 1500)
+      } else {
+        break
+      }
+    }
+
+    // Find all comment blocks authored by Purushottam Sharma
+    const commentLocators = page.locator('[role="article"]')
+    const commentCount = await commentLocators.count()
+
+    let commentIndex = 1
+    for (let c = 0; c < commentCount; c++) {
+      const comment = commentLocators.nth(c)
+      const isAuthor = await comment.evaluate((el, authorName) => {
+        const nameEl = el.querySelector('a[role="link"] span')
+        return nameEl && nameEl.textContent.trim() === authorName
+      }, AUTHOR_NAME)
+
+      if (!isAuthor) continue
+
+      // Check if this comment is a reply — look for parent comment
+      const parentComment = await comment.evaluate((el) => {
+        const prev = el.parentElement?.closest('[role="article"]')
+        return prev ? true : false
+      })
+
+      const commentFile = `${postId}-comment-${commentIndex}.jpg`
+      const commentPath = path.join(commentsDir, commentFile)
+
+      if (parentComment) {
+        // Screenshot the parent + this reply together via the containing element
+        const container = comment.locator('xpath=ancestor::*[contains(@class, "x1y1aw1k")]').first()
+        try {
+          if (await container.isVisible({ timeout: 1000 })) {
+            await container.screenshot({ path: commentPath, type: 'jpeg', quality: 85 })
+          } else {
+            await comment.screenshot({ path: commentPath, type: 'jpeg', quality: 85 })
+          }
+        } catch {
+          await comment.screenshot({ path: commentPath, type: 'jpeg', quality: 85 })
+        }
+      } else {
+        await comment.screenshot({ path: commentPath, type: 'jpeg', quality: 85 })
+      }
+
+      commentScreenshots.push(commentFile)
+      console.log(`  [COMMENT] ${commentFile}`)
+      commentIndex++
+    }
+  } catch (err) {
+    console.log(`  [COMMENTS] Error scanning comments: ${err.message}`)
+  }
+
+  return {
+    id: postId,
+    title,
+    url: postUrl,
+    thumbFile: `${postId}.jpg`,
+    commentFiles: commentScreenshots,
+    date,
+  }
+}
+
+async function screenshotAllPosts(page) {
+  const entries = await readJson(collectedUrlsPath)
+  const pending = entries.filter((e) => !e.screenshotted)
+  const failed = await readJson(failedUrlsPath)
+  const failedSet = new Set(failed.map((f) => f.postUrl))
+
+  console.log(`\nScreenshotting ${pending.length} posts (${entries.length - pending.length} already done)...`)
+
+  const results = []
+  let postIndex = entries.filter((e) => e.screenshotted).length + 1
+
+  for (const entry of pending) {
+    if (failedSet.has(entry.postUrl)) {
+      console.log(`  [SKIP] Previously failed: ${entry.postUrl}`)
+      continue
+    }
+
+    console.log(`\n[${postIndex}/${entries.length}] ${entry.postUrl}`)
+
+    try {
+      // Check for rate-limiting / CAPTCHA
+      const pageContent = await page.content()
+      if (pageContent.includes('Please try again later') || pageContent.includes('checkpoint')) {
+        console.log('\n=== Rate limit or CAPTCHA detected! ===')
+        console.log('Pausing. Resolve in the browser, then press Enter to continue...\n')
+        failed.push({ postUrl: entry.postUrl, reason: 'rate-limited', at: new Date().toISOString() })
+        await writeJson(failedUrlsPath, failed)
+        await waitForEnter()
+      }
+
+      const result = await screenshotPost(page, entry.postUrl, postIndex)
+      if (result) {
+        results.push(result)
+        entry.screenshotted = true
+        await writeJson(collectedUrlsPath, entries)
+      }
+    } catch (err) {
+      console.log(`  [ERROR] ${err.message}`)
+      failed.push({ postUrl: entry.postUrl, reason: err.message, at: new Date().toISOString() })
+      await writeJson(failedUrlsPath, failed)
+    }
+
+    postIndex++
+    await randomDelay(3000, 8000)
+  }
+
+  return results
+}
+
+// Phase 3 will be added in the next task
 
 async function main() {
   const args = process.argv.slice(2)
@@ -167,7 +358,8 @@ async function main() {
     }
 
     if (mode === '--screenshot' || mode === '--all') {
-      console.log('\n[Phase 2 - Screenshots] Not yet implemented.')
+      const results = await screenshotAllPosts(page)
+      console.log(`\nScreenshot phase complete. ${results.length} new posts captured.`)
     }
   } finally {
     await context.close()
