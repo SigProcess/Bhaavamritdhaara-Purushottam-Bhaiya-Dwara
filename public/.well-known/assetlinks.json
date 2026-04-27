@@ -3,6 +3,6 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.bhaavamrit.app",
-    "sha256_cert_fingerprints": ["80:6F:73:DF:AC:86:0C:37:02:5F:A4:82:54:A0:29:AE:4F:2F:95:C5:F6:41:C1:45:23:3B:78:CE:A7:B0:74:21"]
+    "sha256_cert_fingerprints": ["0F:73:90:FF:1D:FD:0E:45:2E:1F:82:59:A9:0C:4D:0F:08:AF:39:DF:41:13:50:03:CB:5A:61:0A:85:5D:BF:D0"]
   }
 }]
