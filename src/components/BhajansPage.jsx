@@ -51,6 +51,7 @@ export default function BhajansPage() {
           const title = formatBhajanName(file)
           const encodedFilePath = file.replaceAll('%', '%25')
           const href = `/bhajan-pdfs/${encodedFilePath}`
+          const viewerHref = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(window.location.origin + href)}`
 
           return (
             <article className="bhajan-row" role="listitem" key={file}>
@@ -59,7 +60,7 @@ export default function BhajansPage() {
                 <div className="bhajan-file">{file}</div>
               </div>
               <div className="bhajan-actions">
-                <a className="bhajan-link" href={href} target="_blank" rel="noreferrer">
+                <a className="bhajan-link" href={viewerHref} target="_blank" rel="noreferrer">
                   Open
                 </a>
                 <a className="bhajan-link secondary" href={href} download>
