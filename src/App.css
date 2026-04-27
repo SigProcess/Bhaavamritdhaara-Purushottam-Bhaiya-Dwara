@@ -159,7 +159,11 @@ nav{
 }
 @media(max-width:600px){
   .hero-banner{min-height:480px}
-  .hero-banner-img{min-height:480px}
+  .hero-banner-img{
+    min-height:480px;
+    object-fit:contain;object-position:center top;
+    background:var(--earth);
+  }
   .hero-banner-overlay{
     background:linear-gradient(to top,rgba(44,24,16,0.85) 0%,rgba(44,24,16,0.5) 50%,rgba(44,24,16,0.3) 100%);
   }
