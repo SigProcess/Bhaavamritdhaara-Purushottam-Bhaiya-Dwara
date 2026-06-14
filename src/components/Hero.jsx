@@ -12,7 +12,7 @@ export default function Hero() {
           <div className="hero-portrait-wrap">
             <img
               className="hero-portrait"
-              src="/bhaiya-portrait.jpg"
+              src="/bhaiya-portrait.png"
               alt="Shri Purushottam Bhaiya"
             />
           </div>
