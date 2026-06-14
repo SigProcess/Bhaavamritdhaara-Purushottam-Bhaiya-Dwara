@@ -4,8 +4,8 @@ export default function Hero() {
       <div className="hero-banner">
         <img
           className="hero-banner-img"
-          src="/bhaiya-altar.jpg"
-          alt="Sacred altar with garlands and offerings"
+          src="/bhaiya-banner.jpg"
+          alt="Shri Purushottam Bhaiya"
         />
         <div className="hero-banner-overlay" />
         <div className="hero-banner-content">
