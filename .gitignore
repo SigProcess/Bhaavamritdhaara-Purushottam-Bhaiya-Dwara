@@ -1,4 +1,21 @@
 node_modules/
 dist/
 .superpowers/
-android/
+.DS_Store
+
+# Android (TWA) — source and config are tracked; secrets and build output are not.
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+
+# Signing credentials — never commit.
+android/keystore.properties
+android/*.keystore
+android/*.keystore.*
+android/*.jks
+
+# Build artifacts.
+android/*.apk
+android/*.aab
+android/*.idsig
