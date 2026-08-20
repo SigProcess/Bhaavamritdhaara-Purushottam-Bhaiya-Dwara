@@ -20,8 +20,8 @@
     "path": "/Users/tasharma/Downloads/Bhaiya Website/Bhaavamritdhaara-Purushottam-Bhaiya-Dwara/android/android.keystore",
     "alias": "android"
   },
-  "appVersionName": "4",
-  "appVersionCode": 4,
+  "appVersionName": "6",
+  "appVersionCode": 6,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://purushottambhaiya.netlify.app/manifest.webmanifest",
@@ -43,5 +43,5 @@
   "fileHandlers": [],
   "launchHandlerClientMode": "",
   "displayOverride": [],
-  "appVersion": "4"
+  "appVersion": "6"
 }
