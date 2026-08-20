@@ -7,13 +7,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg', 'bhaiya-portrait.jpg', 'bhaiya-altar.jpg'],
+      includeAssets: ['favicon.svg', 'app-icon.jpg', 'bhaiya-banner.jpg', 'bhaiya-portrait.jpg', 'bhaiya-altar.jpg'],
       manifest: {
         name: 'Bhaavamritdhaara — Purushottam Bhaiya Dwara',
         short_name: 'Bhaavamrit',
         description: 'Bhajans and Pravachans by Shri Purushottam Bhaiya',
         theme_color: '#2C1810',
-        background_color: '#FAF6F0',
+        background_color: '#FFFFFF',
         display: 'standalone',
         orientation: 'portrait',
         start_url: '/',
