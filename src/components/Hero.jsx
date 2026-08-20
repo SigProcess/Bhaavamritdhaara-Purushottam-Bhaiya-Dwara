@@ -2,20 +2,15 @@ export default function Hero() {
   return (
     <div className="hero">
       <div className="hero-banner">
-        <img
-          className="hero-banner-img"
-          src="/bhaiya-banner.jpg"
-          alt="Shri Purushottam Bhaiya"
-        />
-        <div className="hero-banner-overlay" />
+        <div className="hero-banner-media">
+          <img
+            className="hero-banner-img"
+            src="/bhaiya-banner.jpg"
+            alt="Shri Purushottam Bhaiya"
+          />
+          <div className="hero-banner-overlay" />
+        </div>
         <div className="hero-banner-content">
-          <div className="hero-portrait-wrap">
-            <img
-              className="hero-portrait"
-              src="/bhaiya-portrait.png"
-              alt="Shri Purushottam Bhaiya"
-            />
-          </div>
           <div className="hero-text">
             <div className="hero-eyebrow">Bhajans, Pravachans, lekh and Vani Vishleshan</div>
             <h1 className="hero-title">
