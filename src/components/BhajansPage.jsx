@@ -57,7 +57,6 @@ export default function BhajansPage() {
             <article className="bhajan-row" role="listitem" key={file}>
               <div className="bhajan-meta">
                 <div className="bhajan-name">{title}</div>
-                <div className="bhajan-file">{file}</div>
               </div>
               <div className="bhajan-actions">
                 <a className="bhajan-link" href={viewerHref} target="_blank" rel="noreferrer">
