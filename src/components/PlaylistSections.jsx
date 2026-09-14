@@ -19,8 +19,15 @@ const books = [
     subtitle: 'भाव निर्झरिणी',
     author: 'आनन्दघन (विश्लेषण: पुरुषोत्तम शर्मा)',
     pages: 54,
-    cover: '/book-krishna-arjun.png',
+    cover: '/book-krishna-arjun-cover.jpeg',
     pdf: '/krishna-arjun.pdf',
+  },
+  {
+    id: 'swarn-kalash',
+    title: 'स्वर्ण कलश',
+    pages: 152,
+    cover: '/book-swarn-kalash-cover.jpeg',
+    pdf: '/swarn-kalash.pdf',
   },
 ]
 
