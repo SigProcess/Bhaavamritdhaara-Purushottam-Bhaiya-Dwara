@@ -10,6 +10,10 @@ if ('serviceWorker' in navigator) {
     refreshing = true
     window.location.reload()
   })
+
+  navigator.serviceWorker.ready.then((registration) => {
+    setInterval(() => registration.update(), 5 * 60 * 1000)
+  })
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(

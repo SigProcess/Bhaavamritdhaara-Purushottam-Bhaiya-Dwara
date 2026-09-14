@@ -3,6 +3,12 @@ dist/
 .superpowers/
 .DS_Store
 
+# Transcription tooling: local Python env and scratch audio/caption downloads.
+# The transcripts themselves (transcripts/text, srt, data) are meant to be kept.
+.venv-transcribe/
+transcripts/.audio/
+transcripts/*.log
+
 # Android (TWA) — source and config are tracked; secrets and build output are not.
 android/.gradle/
 android/build/

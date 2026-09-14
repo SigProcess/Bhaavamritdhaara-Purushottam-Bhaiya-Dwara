@@ -16,7 +16,14 @@
     "facebook:collect": "node scripts/screenshot-facebook-posts.js --collect",
     "facebook:screenshot": "node scripts/screenshot-facebook-posts.js --screenshot",
     "facebook:all": "node scripts/screenshot-facebook-posts.js --all",
-    "fetch:playlists": "node scripts/fetch-playlist-videos.js"
+    "fetch:playlists": "node scripts/fetch-playlist-videos.js",
+    "transcribe:setup": "bash scripts/setup-transcribe.sh",
+    "transcribe:probe": "node scripts/probe-video-catalog.js",
+    "transcribe": "node scripts/transcribe-videos.js",
+    "transcribe:captions": "node scripts/transcribe-videos.js --source captions",
+    "transcribe:whisper": "node scripts/transcribe-videos.js --source whisper",
+    "transcribe:edits": "node scripts/apply-transcript-edits.js",
+    "transcribe:corrections": "node scripts/apply-corrections.js"
   },
   "dependencies": {
     "react": "^18.2.0",
