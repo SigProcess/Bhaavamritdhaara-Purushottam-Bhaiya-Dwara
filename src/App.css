@@ -280,7 +280,7 @@ nav{
 .book-card:hover::before{opacity:1}
 
 .book-card-cover{
-  position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;
+  position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;
   background:var(--parchment);
 }
 .book-card-cover img{
