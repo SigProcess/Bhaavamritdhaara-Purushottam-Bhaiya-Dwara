@@ -1,7 +1,8 @@
 import Nav from './components/Nav'
 import Hero from './components/Hero'
-import PlaylistSections from './components/PlaylistSections'
 import BhajanFinder from './components/BhajansPage'
+import PlaylistSections from './components/PlaylistSections'
+import BooksSection from './components/BooksSection'
 import Footer from './components/Footer'
 
 export default function App() {
@@ -18,13 +19,19 @@ export default function App() {
           <div className="section-break-icon">&#x0950;</div>
           <div className="section-break-line" />
         </div>
+        <BhajanFinder />
+        <div className="section-break">
+          <div className="section-break-line" />
+          <div className="section-break-icon">&#x0950;</div>
+          <div className="section-break-line" />
+        </div>
         <PlaylistSections />
         <div className="section-break">
           <div className="section-break-line" />
           <div className="section-break-icon">&#x0950;</div>
           <div className="section-break-line" />
         </div>
-        <BhajanFinder />
+        <BooksSection />
       </main>
       <Footer />
     </div>
