@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import bhajanEntries from '../data/bhajanPdfs'
 
-const VISIBLE_DEFAULT = 15
+const VISIBLE_DEFAULT = 5
 
 function formatHindiName(filename) {
   return filename
