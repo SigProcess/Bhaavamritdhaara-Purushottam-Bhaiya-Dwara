@@ -15,15 +15,19 @@ export default function Card({ playlist, index, ctaLabel = 'Play', onClick }) {
     }
   }
 
+  // A <button>, not a div: the whole card is the control, so it has to be
+  // reachable by keyboard. The inner CTA is a span for the same reason —
+  // a button cannot be nested inside a button.
   return (
-    <div
+    <button
+      type="button"
       className="playlist-card"
       style={{ animationDelay: `${0.05 + index * 0.06}s` }}
       onClick={handleClick}
     >
       {playlist.thumb && (
         <div className="playlist-card-thumb">
-          <img src={playlist.thumb} alt={playlist.title} loading="lazy" />
+          <img src={playlist.thumb} alt="" loading="lazy" />
           <div className="playlist-card-play-overlay">
             <PlayIcon />
           </div>
@@ -31,11 +35,11 @@ export default function Card({ playlist, index, ctaLabel = 'Play', onClick }) {
       )}
       <div className="playlist-card-info">
         <div className="playlist-card-title">{playlist.title}</div>
-        <button className="playlist-card-btn">
+        <span className="playlist-card-btn">
           <PlayIcon />
           {ctaLabel}
-        </button>
+        </span>
       </div>
-    </div>
+    </button>
   )
 }

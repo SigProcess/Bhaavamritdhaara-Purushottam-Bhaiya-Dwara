@@ -29,7 +29,9 @@ export default function BooksSection() {
   return (
     <section className="books-section">
       <div className="section-heading">Published Books</div>
-      <div className="section-subheading">Sacred texts for devotional reading</div>
+      <div className="section-subheading">
+        <span className="hi">प्रकाशित पुस्तकें</span> — sacred texts for devotional reading
+      </div>
       <div className="books-grid">
         {books.map((book, i) => (
           <a

@@ -35,7 +35,8 @@ export default function BhajanFinder() {
     <section className="bhajan-finder" id="bhajan-finder" aria-label="Bhajan Finder">
       <div className="section-heading">Bhajan Finder</div>
       <div className="section-subheading">
-        Search and download {bhajanEntries.length} bhajans with their bhaav (meaning)
+        <span className="hi">भजन खोजें</span> — search and download{' '}
+        {bhajanEntries.length} bhajans with their bhaav (meaning)
       </div>
 
       <div className="bhajan-finder-tools">
@@ -51,6 +52,14 @@ export default function BhajanFinder() {
           {isSearching ? `${filtered.length} found` : `${bhajanEntries.length} bhajans`}
         </div>
       </div>
+
+      {visible.length === 0 && (
+        <p className="bhajan-finder-empty">
+          No bhajan matches “{query.trim()}”. Try fewer letters, or search the
+          Hindi name.
+          <span className="hi"> इस नाम का कोई भजन नहीं मिला — कम अक्षर लिखकर देखें।</span>
+        </p>
+      )}
 
       <div className="bhajan-finder-list" role="list">
         {visible.map(({ file, en }) => {
@@ -78,7 +87,7 @@ export default function BhajanFinder() {
 
       {!isSearching && !showAll && filtered.length > VISIBLE_DEFAULT && (
         <button className="bhajan-finder-show-all" onClick={() => setShowAll(true)}>
-          Show all {filtered.length} bhajans
+          Show all {filtered.length} bhajans — <span className="hi">पूरी सूची देखें</span>
         </button>
       )}
     </section>

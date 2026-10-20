@@ -10,7 +10,9 @@ export default function PlaylistSections() {
   return (
     <div className="sections-container">
       <div className="section-heading">Collections</div>
-      <div className="section-subheading">Curated series of bhajans and pravachans</div>
+      <div className="section-subheading">
+        <span className="hi">संग्रह</span> — curated series of bhajans and pravachans
+      </div>
       <div className="collections-grid">
         {data.collections.map((col, i) => (
           <CollectionCardButton
@@ -26,7 +28,9 @@ export default function PlaylistSections() {
       {data.playlists.length > 0 && (
         <div className="playlists-section">
           <div className="section-heading">More Playlists</div>
-          <div className="section-subheading">Individual devotional playlists</div>
+          <div className="section-subheading">
+            <span className="hi">अन्य प्लेलिस्ट</span> — individual devotional playlists
+          </div>
           <div className="playlists-grid">
             {data.playlists.map((p, i) => (
               <Card key={p.id} playlist={p} index={i} onClick={() => setYtLightbox({ playlist: p })} />

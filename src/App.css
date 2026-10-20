@@ -1023,3 +1023,64 @@ footer{
   border-radius:50%;pointer-events:none;z-index:0;
   background:radial-gradient(circle,rgba(176,48,64,0.05) 0%,transparent 70%);
 }
+
+/* === BILINGUAL TEXT ===
+   Lora and Playfair carry no Devanagari, so inline Hindi inside an English
+   line needs the Devanagari face named explicitly or it falls back to
+   whatever the OS picks. */
+.hi{font-family:'Noto Serif Devanagari','Lora',serif}
+
+.hero-title-hi{
+  font-family:'Noto Serif Devanagari',serif;
+  font-size:clamp(1.25rem,2.3vw,1.8rem);
+  font-weight:500;line-height:1.5;
+  color:var(--saffron-light);
+  margin-bottom:0.5rem;
+}
+.hero-desc-hi{
+  font-family:'Noto Serif Devanagari',serif;
+  font-size:clamp(0.95rem,1.25vw,1.08rem);
+  line-height:1.85;
+  color:rgba(255,255,255,0.66);
+  max-width:46ch;
+  margin-top:0.5rem;
+}
+@media(max-width:1040px){
+  .hero-desc-hi{max-width:none}
+}
+
+/* === ACCESSIBILITY ===
+   The collection and playlist cards are <button> now so they can be reached
+   and opened with a keyboard; previously they were divs with onClick, which
+   no keyboard or screen-reader user could activate. These resets keep them
+   rendering exactly as the original divs did. */
+.collection-card,.playlist-card{
+  display:block;width:100%;padding:0;
+  text-align:left;
+  font-family:inherit;font-size:inherit;color:inherit;
+  -webkit-appearance:none;appearance:none;
+}
+
+:where(a,button,input,[tabindex]):focus-visible{
+  outline:3px solid var(--saffron-deep);
+  outline-offset:3px;
+}
+
+@media(prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation-duration:.01ms !important;
+    animation-iteration-count:1 !important;
+    transition-duration:.01ms !important;
+  }
+}
+
+.bhajan-finder-empty{
+  padding:1.25rem 0 0.25rem;
+  color:var(--text-secondary);
+  font-size:1rem;line-height:1.7;
+  max-width:60ch;
+}
+
+/* Keeps the nav action on one line on narrow phones. */
+.nav-tab{white-space:nowrap}

@@ -16,15 +16,18 @@ function PlayIcon() {
 
 export function CollectionCardButton({ collection, isExpanded, onToggle, index }) {
   const thumb = collection.playlists[0]?.thumb
+  // A <button>, not a div: the whole card is the control, so it has to be
+  // reachable by keyboard.
   return (
-    <div
+    <button
+      type="button"
       className={`collection-card${isExpanded ? ' expanded' : ''}`}
       style={{ animationDelay: `${0.05 + index * 0.06}s` }}
       onClick={onToggle}
     >
       {thumb && (
         <div className="collection-card-thumb">
-          <img src={thumb} alt={collection.title} loading="lazy" />
+          <img src={thumb} alt="" loading="lazy" />
         </div>
       )}
       <div className="collection-card-body">
@@ -36,7 +39,7 @@ export function CollectionCardButton({ collection, isExpanded, onToggle, index }
       <div className="collection-card-chevron">
         <ChevronIcon />
       </div>
-    </div>
+    </button>
   )
 }
 
