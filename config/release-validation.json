@@ -1,0 +1,73 @@
+{
+  "previouslyDistributedReleaseIds": [],
+  "iosRelease": {
+    "project": "ios/App/App.xcodeproj",
+    "projectFile": "ios/App/App.xcodeproj/project.pbxproj",
+    "scheme": "App",
+    "infoPlist": "ios/App/App/Info.plist",
+    "appName": "Bhaavamrit",
+    "bundleId": "com.bhaavamrit.app",
+    "minimumIOSVersion": "15.0",
+    "deviceFamily": "1",
+    "orientations": [
+      "UIInterfaceOrientationPortrait"
+    ],
+    "appIconSet": "AppIcon",
+    "appIconContents": "ios/App/App/Assets.xcassets/AppIcon.appiconset/Contents.json",
+    "appIconFile": "AppIcon-512@2x.png",
+    "appIconSha256": "e4f6a776ee8a4a0aef5d9f0c3b333cfcf91a5380725d467f3d6086c145d56e5e",
+    "privacyManifest": "ios/App/App/PrivacyInfo.xcprivacy",
+    "capacitorGeneratedFiles": [
+      "cordova.js",
+      "cordova_plugins.js"
+    ],
+    "requiredPlugins": [
+      "DocumentPlugin",
+      "SharePlugin",
+      "LifecycleNetworkPlugin"
+    ],
+    "allowedEntitlements": [],
+    "usageDescriptions": {}
+  },
+  "nativePrivacy": {
+    "appManifest": {
+      "path": "ios/App/App/PrivacyInfo.xcprivacy",
+      "declaration": {
+        "NSPrivacyTracking": false,
+        "NSPrivacyTrackingDomains": [],
+        "NSPrivacyCollectedDataTypes": [],
+        "NSPrivacyAccessedAPITypes": []
+      }
+    },
+    "sdks": [
+      {
+        "swiftPackage": "capacitor-swift-pm",
+        "product": "Capacitor",
+        "version": "8.6.0",
+        "npmPackage": "@capacitor/ios",
+        "npmVersion": "8.6.0",
+        "manifestPath": "node_modules/@capacitor/ios/Capacitor/Capacitor/PrivacyInfo.xcprivacy",
+        "privacyManifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [],
+          "NSPrivacyAccessedAPITypes": []
+        }
+      },
+      {
+        "swiftPackage": "capacitor-swift-pm",
+        "product": "Cordova",
+        "version": "8.6.0",
+        "npmPackage": "@capacitor/ios",
+        "npmVersion": "8.6.0",
+        "manifestPath": "node_modules/@capacitor/ios/CapacitorCordova/CapacitorCordova/PrivacyInfo.xcprivacy",
+        "privacyManifest": {
+          "NSPrivacyTracking": false,
+          "NSPrivacyTrackingDomains": [],
+          "NSPrivacyCollectedDataTypes": [],
+          "NSPrivacyAccessedAPITypes": []
+        }
+      }
+    ]
+  }
+}

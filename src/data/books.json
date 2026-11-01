@@ -1,0 +1,26 @@
+[
+  {
+    "id": "rom-rom-ga-raha",
+    "title": "रोम रोम गा रहा",
+    "subtitle": "भाव",
+    "pages": 234,
+    "cover": "/book-rom-rom-cover.jpeg",
+    "pdf": "/rom-rom-ga-raha.pdf"
+  },
+  {
+    "id": "krishna-arjun",
+    "title": "कृष्ण अर्जुन",
+    "subtitle": "भाव निर्झरिणी",
+    "author": "आनन्दघन (विश्लेषण: पुरुषोत्तम शर्मा)",
+    "pages": 54,
+    "cover": "/book-krishna-arjun-cover.jpeg",
+    "pdf": "/krishna-arjun.pdf"
+  },
+  {
+    "id": "swarn-kalash",
+    "title": "स्वर्ण कलश",
+    "pages": 152,
+    "cover": "/book-swarn-kalash-cover.jpeg",
+    "pdf": "/swarn-kalash.pdf"
+  }
+]

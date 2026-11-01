@@ -1,8 +1,20 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import packageMetadata from './package.json'
+
+const releaseVersion = String(
+  process.env.BHAAVAMRIT_RELEASE_VERSION || packageMetadata.version,
+).trim()
+
+if (!releaseVersion || releaseVersion.length > 64) {
+  throw new Error('The generated release version must contain 1 through 64 characters.')
+}
 
 export default defineConfig({
+  define: {
+    __BHAAVAMRIT_BUILD_METADATA__: JSON.stringify({ releaseVersion }),
+  },
   plugins: [
     react(),
     VitePWA({

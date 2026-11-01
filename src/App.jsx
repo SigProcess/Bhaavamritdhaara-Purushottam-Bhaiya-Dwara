@@ -1,39 +1,11 @@
-import Nav from './components/Nav'
-import Hero from './components/Hero'
-import BhajanFinder from './components/BhajansPage'
-import PlaylistSections from './components/PlaylistSections'
-import BooksSection from './components/BooksSection'
-import Footer from './components/Footer'
+import AppProviders from './app/AppProviders'
+import AppShell from './app/AppShell'
 
-export default function App() {
+/** @param {Omit<import('./app/AppProviders').AppProvidersProps, 'children'>} props */
+export default function App({ services, catalogRepository } = {}) {
   return (
-    <div className="app">
-      <div className="bg-grain" />
-      <div className="bg-glow-top" />
-      <div className="bg-glow-bottom" />
-      <Nav />
-      <main>
-        <Hero />
-        <div className="section-break">
-          <div className="section-break-line" />
-          <div className="section-break-icon">&#x0950;</div>
-          <div className="section-break-line" />
-        </div>
-        <BhajanFinder />
-        <div className="section-break">
-          <div className="section-break-line" />
-          <div className="section-break-icon">&#x0950;</div>
-          <div className="section-break-line" />
-        </div>
-        <PlaylistSections />
-        <div className="section-break">
-          <div className="section-break-line" />
-          <div className="section-break-icon">&#x0950;</div>
-          <div className="section-break-line" />
-        </div>
-        <BooksSection />
-      </main>
-      <Footer />
-    </div>
+    <AppProviders services={services} catalogRepository={catalogRepository}>
+      <AppShell />
+    </AppProviders>
   )
 }

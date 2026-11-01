@@ -8,14 +8,15 @@ export default function Hero() {
             src="/bhaiya-banner.jpg"
             alt="Shri Purushottam Bhaiya"
           />
-          <div className="hero-banner-overlay" />
+          <div className="hero-banner-overlay" aria-hidden="true" />
         </div>
         <div className="hero-banner-content">
           <div className="hero-text">
             <div className="hero-eyebrow">Bhajans, Pravachans, Lekh and Vani Vishleshan</div>
-            <h1 className="hero-title">Bhaavamritdhaara</h1>
+            <h1 className="hero-title">
+              Bhaavamritdhaara <span className="hero-title-attribution">— Purushottam Bhaiya Dwara</span>
+            </h1>
             <p className="hero-title-hi">भावामृत धारा</p>
-            <p className="hero-subtitle">Purushottam Bhaiya Dwara</p>
             <p className="hero-desc">
               Bhajans, pravachans and published books by Shri Purushottam Bhaiya,
               all in one place.

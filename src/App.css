@@ -33,8 +33,7 @@ body{
 }
 
 /* === NAV === */
-nav{
-  position:fixed;top:0;left:0;right:0;z-index:100;
+.site-nav{
   padding:0 clamp(1.5rem,4vw,3rem);height:64px;
   display:flex;align-items:center;justify-content:space-between;
   background:rgba(240,230,214,0.82);
@@ -262,6 +261,7 @@ nav{
   background:var(--card-bg);
   border:1px solid var(--card-border);
   text-decoration:none;color:inherit;
+  font:inherit;text-align:left;cursor:pointer;padding:0;
   display:flex;flex-direction:column;
   transition:all 0.4s cubic-bezier(.23,1,.32,1);
   animation:slideUp 0.5s ease both;
@@ -828,10 +828,16 @@ nav{
 }
 .bhajan-finder-tools{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:1rem;
   margin-bottom:1.5rem;
+}
+.bhajan-finder-search-wrap{
+  display:flex;
+  align-items:center;
+  gap:0.75rem;
+  width:min(720px,100%);
 }
 .bhajan-finder-search{
   width:min(560px,100%);
@@ -853,6 +859,17 @@ nav{
   border-color:var(--saffron);
   box-shadow:0 4px 20px rgba(224,122,31,0.12),0 0 0 4px rgba(224,122,31,0.08),inset 0 1px 2px rgba(255,255,255,0.6);
   background:#fff;
+}
+.bhajan-finder-clear,
+.bhajan-finder-retry{
+  min-height:44px;
+  border:1px solid rgba(180,150,110,0.35);
+  border-radius:10px;
+  padding:8px 14px;
+  background:var(--warm-white);
+  color:var(--saffron-deep);
+  font:600 0.82rem 'Lora',Georgia,serif;
+  cursor:pointer;
 }
 .bhajan-finder-count{
   font-size:0.85rem;
@@ -886,6 +903,7 @@ nav{
 }
 .bhajan-finder-meta{
   min-width:0;
+  flex:1;
 }
 .bhajan-finder-name{
   font-family:'Noto Serif Devanagari','Playfair Display',serif;
@@ -903,6 +921,30 @@ nav{
   overflow:hidden;
   text-overflow:ellipsis;
 }
+.bhajan-finder-meaning{
+  margin-top:0.5rem;
+  color:var(--text-secondary);
+  font-size:0.9rem;
+  line-height:1.55;
+}
+.bhajan-finder-validation,
+.bhajan-finder-error{
+  color:var(--crimson);
+  line-height:1.5;
+}
+.bhajan-finder-validation{
+  margin:-0.5rem 0 1.25rem;
+}
+.bhajan-finder-error{
+  margin-top:0.75rem;
+  padding:0.75rem;
+  border-left:3px solid var(--crimson);
+  background:rgba(176,48,64,0.06);
+  border-radius:6px;
+}
+.bhajan-finder-error p{
+  margin:0 0 0.5rem;
+}
 .bhajan-finder-actions{
   display:flex;
   align-items:center;
@@ -913,15 +955,23 @@ nav{
   display:inline-flex;
   align-items:center;
   justify-content:center;
+  min-height:44px;
   border-radius:10px;
   border:1px solid transparent;
   text-decoration:none;
+  font-family:inherit;
   font-size:0.82rem;
   font-weight:600;
   letter-spacing:0.08em;
   text-transform:uppercase;
   padding:9px 16px;
+  cursor:pointer;
   transition:all 0.25s ease;
+}
+.bhajan-finder-btn:disabled,
+.bhajan-finder-retry:disabled{
+  cursor:not-allowed;
+  opacity:0.55;
 }
 .bhajan-finder-btn.primary{
   background:linear-gradient(135deg,var(--saffron),var(--crimson));
@@ -965,9 +1015,13 @@ nav{
   transform:translateY(-1px);
 }
 @media(max-width:760px){
-  .bhajan-finder-tools{
+  .bhajan-finder-tools,
+  .bhajan-finder-search-wrap{
     flex-direction:column;
     align-items:stretch;
+  }
+  .bhajan-finder-search{
+    width:100%;
   }
   .bhajan-finder-row{
     flex-direction:column;
@@ -1084,3 +1138,330 @@ footer{
 
 /* Keeps the nav action on one line on narrow phones. */
 .nav-tab{white-space:nowrap}
+
+/* === CATALOG ROUTES AND STATES === */
+.catalog-route{min-height:55vh}
+.catalog-back-button,.catalog-state button{
+  min-height:44px;padding:10px 16px;border:1px solid rgba(176,48,64,0.35);
+  border-radius:10px;background:var(--card-bg);color:var(--earth);
+  font:600 .88rem 'Lora',serif;cursor:pointer;margin-bottom:1.25rem;
+}
+.catalog-back-button:focus-visible,.catalog-state button:focus-visible,
+.collection-card:focus-visible,.playlist-card:focus-visible{
+  outline:3px solid var(--saffron);outline-offset:3px;
+}
+.catalog-state{
+  padding:1rem 1.1rem;border:1px solid var(--card-border);border-radius:12px;
+  background:var(--card-bg);color:var(--text-secondary);line-height:1.5;
+}
+.catalog-state button{display:block;margin:.85rem 0 0}
+.catalog-error{border-color:rgba(176,48,64,.4);background:var(--crimson-soft);color:var(--crimson)}
+@media(prefers-reduced-motion:reduce){
+  .collection-card,.playlist-card,.collection-card img,.playlist-card img{animation:none;transition:none}
+}
+
+/* === PRIVACY NOTICE === */
+.footer-privacy-button,
+.privacy-close-button{
+  min-width:44px;min-height:44px;padding:10px 16px;
+  border:1px solid rgba(176,48,64,.35);border-radius:10px;
+  background:var(--card-bg);color:var(--earth);
+  font:600 .9rem 'Lora',Georgia,serif;cursor:pointer;
+}
+.footer-privacy-button{margin-top:1.25rem}
+.privacy-notice{
+  position:relative;z-index:1;
+  width:min(920px,calc(100% - 2rem));margin:0 auto;
+  padding:clamp(6rem,12vw,8rem) 0 4rem;
+  color:var(--earth);line-height:1.65;
+}
+.privacy-header,.privacy-section{
+  padding:clamp(1rem,4vw,2rem);
+  border:1px solid var(--card-border);border-radius:18px;
+  background:var(--card-bg);box-shadow:0 8px 30px var(--shadow-warm);
+}
+.privacy-header{margin-top:1.25rem}
+.privacy-header h1,.privacy-section h2,.privacy-activity h3,.privacy-sources h4{
+  color:var(--earth);line-height:1.25;
+}
+.privacy-header h1{margin:.35rem 0 1rem;font-size:clamp(2rem,6vw,3.2rem)}
+.privacy-eyebrow,.privacy-service-name{
+  color:var(--saffron-deep);font-weight:700;letter-spacing:.03em;
+}
+.privacy-section{margin-top:1.5rem}
+.privacy-section>h2{font-size:clamp(1.5rem,4vw,2.1rem)}
+.privacy-activity{
+  margin-top:1.25rem;padding:clamp(1rem,3vw,1.5rem);
+  border-left:4px solid var(--saffron);border-radius:10px;
+  background:var(--warm-white);
+}
+.privacy-activity h3{margin:0 0 .4rem;font-size:1.15rem}
+.privacy-activity dl{margin:1rem 0 0}
+.privacy-activity dl>div{margin-top:.8rem}
+.privacy-activity dt{font-weight:700;color:var(--earth)}
+.privacy-activity dd{margin:.15rem 0 0;color:var(--text-secondary)}
+.privacy-sources{margin-top:1rem}
+.privacy-sources h4{margin:0;font-size:1rem}
+.privacy-sources ul{margin:.4rem 0 0;padding-left:1.25rem}
+.privacy-sources a{color:var(--crimson);text-decoration-thickness:1px;text-underline-offset:3px}
+@media(max-width:440px){
+  .privacy-notice{width:min(100% - 1rem,920px)}
+  .privacy-header,.privacy-section{padding:1rem;border-radius:12px}
+  .privacy-activity{padding:1rem}
+}
+.hero-title-attribution{
+  display:block;
+  margin-top:.35rem;
+  color:var(--saffron-light);
+  font-size:clamp(1.15rem,2.2vw,1.7rem);
+  font-style:italic;
+  font-weight:400;
+  line-height:1.2;
+}
+.category-navigation{
+  width:min(1180px,calc(100% - 2rem));
+  margin:1.25rem auto 0;
+}
+.category-navigation ul{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.65rem;
+  padding:0;
+  list-style:none;
+}
+.category-navigation a{
+  display:flex;
+  min-height:44px;
+  align-items:center;
+  border:1px solid rgba(176,48,64,.24);
+  border-radius:999px;
+  padding:.6rem 1rem;
+  background:var(--warm-white);
+  color:var(--earth);
+  font-weight:600;
+  text-decoration:none;
+}
+.category-navigation a:focus-visible,
+.category-navigation a:hover{
+  border-color:var(--saffron);
+  color:var(--crimson);
+}
+.app-availability-status{
+  position:relative;
+  z-index:2;
+  width:min(1180px,calc(100% - 2rem));
+  margin:.75rem auto 0;
+  border:1px solid rgba(201,147,58,.45);
+  border-radius:10px;
+  padding:.75rem 1rem;
+  background:var(--warm-white);
+  color:var(--earth-mid);
+  text-align:center;
+}
+
+/* === IPHONE RESPONSIVE AND ACCESSIBILITY BOUNDARIES === */
+:root{
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-right:env(safe-area-inset-right,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+  --safe-left:env(safe-area-inset-left,0px);
+  --text-muted:#6F5040;
+  --control-border:#8A7060;
+  --focus-inner:#FFFFFF;
+  --focus-outer:#1A0A02;
+}
+
+html{
+  min-width:320px;
+  min-height:100%;
+  overflow-x:hidden;
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
+}
+body{
+  min-width:320px;
+  min-height:100%;
+  overflow-x:hidden;
+  font:-apple-system-body;
+  font-family:'Lora',Georgia,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+}
+#root,.app{min-height:100vh;min-height:100dvh}
+.app{overflow-x:clip}
+main{display:block;min-width:0}
+
+/* The primary bar participates in layout so larger Dynamic Type cannot be
+   covered by content. Its actions keep visible boundaries without overlaying content. */
+.site-nav{
+  position:relative;
+  top:auto;
+  left:auto;
+  right:auto;
+  width:100%;
+  height:auto;
+  min-height:calc(64px + var(--safe-top));
+  padding-top:var(--safe-top);
+  padding-right:max(clamp(1rem,4vw,3rem),var(--safe-right));
+  padding-left:max(clamp(1rem,4vw,3rem),var(--safe-left));
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:.75rem;
+}
+.hero{padding-top:0}
+.nav-logo{min-width:0}
+.nav-title-group{min-width:0}
+.nav-title,.nav-subtitle{white-space:normal;overflow-wrap:anywhere}
+.nav-right-wrap{min-width:0}
+
+/* Every actionable element has an iPhone-sized target and a persistent visual
+   boundary. Labels wrap rather than disappear at large text sizes. */
+:where(button,input,select,textarea,summary,[role='button'],a){
+  min-width:44px;
+  min-height:44px;
+  touch-action:manipulation;
+}
+:where(button,input,select,textarea){font:inherit}
+:where(button,[role='button'],select,input[type='search']){
+  border-color:var(--control-border);
+}
+:where(button,a,select,input,textarea,summary,[tabindex]):focus-visible{
+  outline:3px solid var(--focus-inner) !important;
+  outline-offset:2px !important;
+  box-shadow:0 0 0 5px var(--focus-outer) !important;
+}
+:where(button,[role='button']):disabled{
+  cursor:not-allowed;
+  opacity:.58;
+}
+.category-navigation a,.privacy-sources a{
+  display:inline-flex;
+  align-items:center;
+  overflow-wrap:anywhere;
+}
+.privacy-sources a{padding-block:.35rem}
+
+/* Saffron and gold remain identity accents. Crimson or earth carries small
+   text and control boundaries because those combinations meet text contrast. */
+.hero-eyebrow,.hero-subtitle,.hero-title-hi,.hero-title-attribution{color:#FFD19B}
+.book-card-btn,.book-card-btn svg,
+.collection-card-chevron svg,
+.bhajan-finder-clear,.bhajan-finder-retry,
+.bhajan-finder-btn.secondary,.bhajan-finder-show-all,
+.privacy-eyebrow,.privacy-service-name{color:var(--crimson)}
+.book-card,.collection-card,.playlist-card,.bhajan-finder-row,
+.category-navigation a,.footer-privacy-button,.privacy-close-button,
+.catalog-back-button,.catalog-state button,.bhajan-finder-clear,
+.bhajan-finder-retry,.bhajan-finder-btn.secondary,.bhajan-finder-show-all{
+  border-color:var(--control-border);
+}
+
+/* Hover must never be the only indicator that a card or playlist is actionable. */
+.collection-card::before,.book-card::before{opacity:1}
+.playlist-card-play-overlay{background:rgba(26,10,2,.34)}
+.playlist-card-play-overlay svg{opacity:1;transform:scale(1)}
+.playlist-card-btn,.book-card-btn{border-color:var(--control-border)}
+
+/* Content and required actions stay reachable as the viewport or text grows. */
+.sections-container,.bhajan-finder,.books-section,footer{
+  padding-right:max(clamp(1rem,5vw,4rem),var(--safe-right));
+  padding-left:max(clamp(1rem,5vw,4rem),var(--safe-left));
+}
+footer{padding-bottom:max(3.5rem,var(--safe-bottom))}
+.privacy-notice{
+  padding-right:max(0px,var(--safe-right));
+  padding-bottom:max(4rem,var(--safe-bottom));
+  padding-left:max(0px,var(--safe-left));
+}
+.app-availability-status,.category-navigation{
+  margin-right:max(1rem,var(--safe-right));
+  margin-left:max(1rem,var(--safe-left));
+  width:auto;
+}
+.bhajan-finder-name,.bhajan-finder-name-en{
+  white-space:normal;
+  overflow:visible;
+  text-overflow:clip;
+  overflow-wrap:anywhere;
+}
+.section-heading,.section-subheading,.catalog-state,
+.book-card-title,.book-card-subtitle,.book-card-author,.book-card-meta,
+.collection-card-title,.playlist-card-title,.sub-playlist-title,
+.video-player-option span,.privacy-notice p,.privacy-notice dd{
+  overflow-wrap:anywhere;
+}
+.bhajan-finder-actions,.video-player-controls{align-items:stretch}
+.video-player-controls button{padding:.65rem 1rem}
+.catalog-route{padding-top:clamp(1rem,4vw,2.5rem)}
+
+@media(max-width:480px){
+  .site-nav{
+    grid-template-columns:minmax(0,1fr);
+    padding-right:max(.75rem,var(--safe-right));
+    padding-left:max(.75rem,var(--safe-left));
+  }
+  .nav-right-wrap{width:100%}
+  .nav-tab{width:100%;justify-content:center}
+  .nav-logo{gap:.5rem}
+  .nav-logo-mark{width:44px;height:44px;flex:0 0 44px}
+  .nav-title{font-size:clamp(.82rem,4.5vw,1rem)}
+  .nav-subtitle{font-size:clamp(.55rem,2.8vw,.68rem);letter-spacing:.08em}
+  .nav-tab{padding:.55rem .65rem;font-size:clamp(.68rem,3.3vw,.8rem);white-space:normal;text-align:center}
+  .hero-banner-media{height:min(58vh,78vw)}
+  .hero-banner-content{padding-right:max(1rem,var(--safe-right));padding-left:max(1rem,var(--safe-left))}
+  .hero-title{font-size:clamp(2rem,12vw,3rem)}
+  .collections-grid,.playlists-grid,.books-grid{grid-template-columns:minmax(0,1fr)}
+  .bhajan-finder-tools,.bhajan-finder-search-wrap,.bhajan-finder-row{min-width:0}
+  .bhajan-finder-actions{flex-direction:column}
+  .bhajan-finder-btn{width:100%;flex:none;white-space:normal}
+  .bhajan-finder-count{white-space:normal;overflow-wrap:anywhere}
+  .section-break{padding-right:max(1rem,var(--safe-right));padding-left:max(1rem,var(--safe-left))}
+}
+
+@media(max-width:350px){
+  .site-nav{grid-template-columns:minmax(0,1fr)}
+  .nav-right-wrap{width:100%}
+  .nav-tab{width:100%;justify-content:center}
+  .video-player-option{grid-template-columns:1.5rem minmax(0,1fr)}
+  .video-player-option img{grid-column:2}
+  .video-player-option span:last-child{grid-column:1/-1}
+}
+
+@media(prefers-reduced-motion:reduce){
+  html:focus-within{scroll-behavior:auto}
+  *,*::before,*::after{
+    animation:none !important;
+    scroll-behavior:auto !important;
+    transition-property:color,background-color,border-color,opacity !important;
+    transition-duration:.01ms !important;
+    transition-delay:0s !important;
+  }
+  :where(.book-card,.collection-card,.playlist-card,.bhajan-finder-row):hover,
+  .nav-logo:hover .nav-logo-mark,
+  .fb-lightbox-close:hover,
+  .playlist-card:hover img,.collection-card:hover img,.book-card:hover img{
+    transform:none !important;
+  }
+}
+
+/* Route-level exit actions remain available when a route restores a deep
+   predecessor scroll position. */
+.catalog-back-button,
+.privacy-close-button{
+  position:sticky;
+  top:max(.5rem,var(--safe-top));
+  z-index:20;
+  background:var(--card-bg);
+}
+
+[data-route='collection'] .catalog-back-button,
+[data-route='playlist'] .catalog-back-button,
+[data-route='privacy'] .privacy-close-button{
+  position:fixed;
+  top:max(.5rem,calc(var(--safe-top) + .5rem));
+  left:max(1rem,var(--safe-left));
+  margin:0;
+  z-index:150;
+  box-shadow:0 2px 10px rgba(26,10,2,.22);
+}
+.catalog-route,
+.privacy-notice{padding-top:max(5rem,calc(var(--safe-top) + 5rem))}

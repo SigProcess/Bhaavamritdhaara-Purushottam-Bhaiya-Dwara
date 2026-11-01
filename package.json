@@ -7,6 +7,18 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test:unit": "vitest run --config vitest.config.ts",
+    "test:property": "vitest run --config vitest.property.config.ts --passWithNoTests",
+    "test:component": "vitest run --config vitest.component.config.ts --passWithNoTests",
+    "release:metadata:validate": "node scripts/validate-release.mjs && vitest run --config vitest.config.ts src/domain/release/releaseValidator.test.ts",
+    "release:ios": "node scripts/prepare-ios-release.mjs --archive=auto",
+    "release:ios:required": "node scripts/prepare-ios-release.mjs --archive=required",
+    "release:readiness": "node scripts/verify-release-readiness.mjs",
+    "release:validate": "npm run typecheck && npm run release:metadata:validate && npm run test:unit && npm run test:property && npm run test:component && npm run build",
+    "catalog:generate": "node scripts/generate-catalog.mjs",
+    "catalog:validate": "node scripts/validate-catalog.mjs",
+    "capacitor:sync": "npm run build && cap sync ios",
     "facebook:extract": "node scripts/extract-facebook-post-urls.js",
     "facebook:autofill": "node scripts/autofill-facebook-thumbnail-filenames.js",
     "facebook:thumbs": "node scripts/process-facebook-thumbnails.js",
@@ -26,14 +38,26 @@
     "transcribe:corrections": "node scripts/apply-corrections.js"
   },
   "dependencies": {
+    "@capacitor/core": "^8.6.0",
+    "@capacitor/ios": "^8.6.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.6.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.8",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^4.2.1",
+    "fast-check": "^4.10.2",
+    "jsdom": "^29.1.1",
     "playwright": "^1.59.1",
     "sharp": "^0.34.5",
+    "typescript": "^7.0.2",
     "vite": "^5.4.2",
-    "vite-plugin-pwa": "^1.2.0"
+    "vite-plugin-pwa": "^1.2.0",
+    "vitest": "^2.1.9"
   }
 }

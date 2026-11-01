@@ -1,0 +1,52 @@
+name: iOS Cloud Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-cloud-build-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate-ios:
+    name: Validate iOS package and unsigned archive
+    runs-on: macos-26
+    timeout-minutes: 60
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Record toolchain versions
+        run: |
+          set -euo pipefail
+          sw_vers
+          node --version
+          npm --version
+          xcode-select --print-path
+          xcodebuild -version
+
+      - name: Set reproducible build timestamp
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Run release readiness checks
+        run: npm run release:readiness
