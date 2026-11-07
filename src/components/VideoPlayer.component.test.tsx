@@ -47,7 +47,7 @@ describe('VideoPlayer', () => {
     expect(media.handles).toHaveLength(0)
   })
 
-  it('plays only after explicit selection and accepts playing before five seconds', async () => {
+  it('plays only after explicit selection and accepts playing before the deadline', async () => {
     vi.useFakeTimers()
     const media = new FakeExternalMediaService()
     render(
@@ -72,7 +72,7 @@ describe('VideoPlayer', () => {
       'true',
     )
 
-    await vi.advanceTimersByTimeAsync(4_999)
+    await vi.advanceTimersByTimeAsync(29_999)
     media.handles[0].emit('playing')
     await vi.advanceTimersByTimeAsync(1)
 
@@ -81,7 +81,7 @@ describe('VideoPlayer', () => {
     expect(status).toHaveTextContent('Playing English Discourse.')
   })
 
-  it('enforces the five-second playing-state deadline', async () => {
+  it('enforces the playing-state deadline', async () => {
     vi.useFakeTimers()
     const media = new FakeExternalMediaService()
     render(
@@ -94,14 +94,14 @@ describe('VideoPlayer', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Play selected video' }))
-    await vi.advanceTimersByTimeAsync(5_000)
+    await vi.advanceTimersByTimeAsync(30_000)
 
     expect(screen.getByRole('status')).toHaveTextContent(
-      'हिन्दी प्रवचन did not begin playing within 5 seconds.',
+      'हिन्दी प्रवचन did not begin playing in time.',
     )
     media.handles[0].emit('playing')
     expect(screen.getByRole('status')).toHaveTextContent(
-      'हिन्दी प्रवचन did not begin playing within 5 seconds.',
+      'हिन्दी प्रवचन did not begin playing in time.',
     )
   })
 
@@ -168,14 +168,22 @@ describe('VideoPlayer failure recovery', () => {
     )
 
     fireEvent.click(screen.getByRole('button', { name: 'Play selected video' }))
-    await vi.advanceTimersByTimeAsync(5_000)
+    await vi.advanceTimersByTimeAsync(30_000)
 
     const requestId = media.prepareCalls[0].requestId
     expect(media.handles[0].disposeCalls).toHaveLength(1)
     expect(screen.getByRole('status')).toHaveTextContent(
-      'हिन्दी प्रवचन did not begin playing within 5 seconds.',
+      'हिन्दी प्रवचन did not begin playing in time.',
     )
-    expect(screen.queryByRole('button', { name: /Open .* in YouTube/ })).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: 'Open हिन्दी प्रवचन in YouTube' }))
+    expect(media.externalOpenCalls).toEqual([
+      expect.objectContaining({
+        requestId,
+        playlistId: recordedPlaylist.id,
+        videoId: recordedPlaylist.videos![0].id,
+      }),
+    ])
 
     fireEvent.click(screen.getByRole('button', { name: 'Retry हिन्दी प्रवचन' }))
     await vi.advanceTimersByTimeAsync(0)

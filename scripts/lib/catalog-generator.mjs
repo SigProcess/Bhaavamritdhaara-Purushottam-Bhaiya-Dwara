@@ -211,6 +211,7 @@ const projectCatalog = (sources, assets, metadata) => {
     ...(playlist.videos.length > 0 ? {
       videos: playlist.videos.map((video) => ({
         id: video.id,
+        sourceVideoId: video.sourceVideoId,
         title: video.title,
         thumbnail: assetRef(video.thumbnail),
       })),

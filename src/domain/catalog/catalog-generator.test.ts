@@ -99,6 +99,11 @@ describe('catalog generator', () => {
       catalogVersion: expect.stringMatching(/^catalog:[a-f0-9]{64}$/),
     })
     expect(first.catalog.collectionPlaylists).toHaveLength(1)
+    expect(first.catalog.collectionPlaylists[0].videos?.[0]).toMatchObject({
+      id: 'video:one',
+      sourceVideoId: 'youtube-one',
+      title: 'Video',
+    })
     expect(first.catalog.assets).toHaveLength(assetBytes.size)
     expect(first.catalog.assets).toEqual(expect.arrayContaining([
       expect.objectContaining({

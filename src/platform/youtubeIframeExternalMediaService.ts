@@ -9,6 +9,9 @@ import type {
   PlaylistRecord,
   Unsubscribe,
 } from '../domain/contracts'
+import { detectBrowserPlatform } from './browser/browserAdapters'
+
+const YOUTUBE_ANDROID_PACKAGE = 'com.google.android.youtube'
 
 interface YouTubePlayerEvent {
   readonly data: number
@@ -88,6 +91,35 @@ function loadYouTubeApi(): Promise<YouTubeApi> {
   apiPromise = pendingApi
 
   return pendingApi
+}
+
+/**
+ * Chrome resolves an intent URI to the installed app and follows
+ * `browser_fallback_url` when no app can handle it.
+ */
+function androidIntentUrl(target: string): string {
+  const { host, pathname, search } = new URL(target)
+  return [
+    `intent://${host}${pathname}${search}#Intent`,
+    'scheme=https',
+    `package=${YOUTUBE_ANDROID_PACKAGE}`,
+    `S.browser_fallback_url=${encodeURIComponent(target)}`,
+    'end',
+  ].join(';')
+}
+
+/**
+ * An Android Trusted Web Activity can swallow a `_blank` popup, which looks to
+ * the user like the link does nothing, so Android navigates to an intent URI
+ * instead. Browsers and the Capacitor iOS bridge both hand a `_blank` target to
+ * the system already, so they keep the popup and stay on the current page.
+ */
+function openExternalUrl(target: string): void {
+  if (detectBrowserPlatform() === 'android') {
+    window.location.assign(androidIntentUrl(target))
+    return
+  }
+  window.open(target, '_blank', 'noopener,noreferrer')
 }
 
 function findPlaylist(catalog: Catalog, request: PlaybackRequest): PlaylistRecord {
@@ -233,6 +265,6 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
     const url = video
       ? `https://www.youtube.com/watch?v=${encodeURIComponent(video.sourceVideoId)}`
       : `https://www.youtube.com/playlist?list=${encodeURIComponent(playlist.youtubePlaylistId!)}`
-    window.open(url, '_blank', 'noopener,noreferrer')
+    openExternalUrl(url)
   }
 }

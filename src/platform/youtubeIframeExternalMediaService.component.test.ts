@@ -106,6 +106,37 @@ describe('YouTubeIframeExternalMediaService failures', () => {
     expect(listener).toHaveBeenCalledWith('failed')
   })
 
+  it('hands Android an intent URI that falls back to the canonical watch URL', async () => {
+    installApi()
+    const assign = vi.fn()
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 Chrome/131.0.0.0 Mobile Safari/537.36',
+    )
+    vi.spyOn(window, 'location', 'get').mockReturnValue({
+      ...window.location,
+      assign,
+    } as unknown as Location)
+    const open = vi.spyOn(window, 'open').mockImplementation(() => null)
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const playlist = canonicalCatalogFixture.collectionPlaylists[0]
+    const video = playlist.videos![0]
+
+    await service.openExternally({
+      requestId: 'playback-external-android' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    })
+
+    const watchUrl = `https://www.youtube.com/watch?v=${encodeURIComponent(video.sourceVideoId)}`
+    expect(open).not.toHaveBeenCalled()
+    expect(assign).toHaveBeenCalledWith(
+      `intent://www.youtube.com/watch?v=${encodeURIComponent(video.sourceVideoId)}`
+      + '#Intent;scheme=https;package=com.google.android.youtube'
+      + `;S.browser_fallback_url=${encodeURIComponent(watchUrl)};end`,
+    )
+    vi.restoreAllMocks()
+  })
+
   it('opens only a canonical video or playlist target externally', async () => {
     installApi()
     const open = vi.spyOn(window, 'open').mockImplementation(() => null)

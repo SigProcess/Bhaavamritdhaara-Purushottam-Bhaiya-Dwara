@@ -5,7 +5,7 @@ import { stableJson } from './catalog-generator.mjs'
 const RECORD_FIELDS = Object.freeze({
   collection: ['title', 'thumbnail'],
   playlist: ['title', 'thumbnail', 'youtubePlaylistId', 'collectionId'],
-  video: ['title', 'thumbnail'],
+  video: ['sourceVideoId', 'title', 'thumbnail'],
   bhajan: ['hindiTitle', 'englishTitle', 'meaning', 'document'],
   book: ['title', 'subtitle', 'author', 'pageCount', 'cover', 'document'],
   asset: ['path', 'byteLength', 'mediaType', 'availability'],

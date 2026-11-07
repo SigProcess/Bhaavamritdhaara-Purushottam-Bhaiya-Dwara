@@ -34,7 +34,7 @@ import { BrowserNetworkService } from '../platform/browserNetworkService'
 import { YouTubeIframeExternalMediaService } from '../platform/youtubeIframeExternalMediaService'
 import './VideoPlayer.css'
 
-const PLAYING_DEADLINE_MS = 5_000
+const PLAYING_DEADLINE_MS = 30_000
 const PLAYBACK_TIMEOUT = 'PLAYBACK_TIMEOUT'
 const PLAYBACK_OFFLINE = 'PLAYBACK_OFFLINE'
 const PLAYBACK_SERVICE_ERROR = 'PLAYBACK_SERVICE_ERROR'
@@ -405,7 +405,7 @@ export default function VideoPlayer({
                 Retry {contentTitle}
               </button>
             )}
-            {errorCode === PLAYBACK_SERVICE_ERROR && (
+            {activeRequest !== undefined && (retryVisible || state.playbackState === 'loading') && (
               <button type="button" onClick={openExternally}>
                 Open {contentTitle} in YouTube
               </button>
@@ -415,7 +415,7 @@ export default function VideoPlayer({
           <p className="video-player-status" role="status" aria-live="polite" aria-atomic="true">
             {state.playbackState === 'loading' && `Starting ${contentTitle}…`}
             {state.playbackState === 'playing' && `Playing ${contentTitle}.`}
-            {state.playbackState === 'failed' && errorCode === PLAYBACK_TIMEOUT && `${contentTitle} did not begin playing within 5 seconds.`}
+            {state.playbackState === 'failed' && errorCode === PLAYBACK_TIMEOUT && `${contentTitle} did not begin playing in time.`}
             {state.playbackState === 'failed' && errorCode === PLAYBACK_OFFLINE && `${contentTitle} requires a network connection.`}
             {state.playbackState === 'failed' && errorCode === PLAYBACK_SERVICE_ERROR && `${contentTitle} is unavailable in the embedded player.`}
           </p>
