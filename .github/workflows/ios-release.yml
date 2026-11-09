@@ -40,16 +40,23 @@ jobs:
     environment: ios-release
     timeout-minutes: 120
 
-    env:
-      ARCHIVE_PATH: ${{ runner.temp }}/build/Bhaavamrit.xcarchive
-      DERIVED_DATA_PATH: ${{ runner.temp }}/build/DerivedData
-      EXPORT_OPTIONS_PATH: ${{ runner.temp }}/signing/ExportOptions.plist
-      EXPORT_PATH: ${{ runner.temp }}/export
-      KEYCHAIN_PATH: ${{ runner.temp }}/signing/ios-release.keychain-db
-      PROFILE_PATH: ${{ runner.temp }}/signing/profile.mobileprovision
-      CERTIFICATE_PATH: ${{ runner.temp }}/signing/distribution.p12
-
     steps:
+      # The `runner` context is not available in a job-level `env:` block, so
+      # these paths are computed here from $RUNNER_TEMP and exported through
+      # $GITHUB_ENV for every later step. This must stay the first step.
+      - name: Compute signing and build paths
+        run: |
+          set -euo pipefail
+          {
+            echo "ARCHIVE_PATH=$RUNNER_TEMP/build/Bhaavamrit.xcarchive"
+            echo "DERIVED_DATA_PATH=$RUNNER_TEMP/build/DerivedData"
+            echo "EXPORT_OPTIONS_PATH=$RUNNER_TEMP/signing/ExportOptions.plist"
+            echo "EXPORT_PATH=$RUNNER_TEMP/export"
+            echo "KEYCHAIN_PATH=$RUNNER_TEMP/signing/ios-release.keychain-db"
+            echo "PROFILE_PATH=$RUNNER_TEMP/signing/profile.mobileprovision"
+            echo "CERTIFICATE_PATH=$RUNNER_TEMP/signing/distribution.p12"
+          } >> "$GITHUB_ENV"
+
       - name: Check out repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
