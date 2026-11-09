@@ -188,7 +188,17 @@ final class StoreScreenshotTests: XCTestCase {
 
     private func captureVideoScreens() {
         note("step=04-playlist")
-        prepareHome()
+        // Deliberately NO prepareHome() here. Step 03 leaves the collections grid on screen,
+        // which is exactly where the collection cards are reachable — the log from run
+        // 42666271988 showed every "Open … N playlists" button stuck [offscreen] precisely
+        // because resetting to the top scrolled away from the grid we had just captured.
+        // Continue from that state, and only fall back to re-navigating if it has been lost.
+        if !app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "playlists")).firstMatch.isHittable {
+            note("collections grid not in view; re-navigating via anchor")
+            prepareHome()
+            _ = tapLink(["Pravachans", "Lekh", "Vani Vishleshan"])
+            sleep(settle + 0.8)
+        }
 
         // Collection cards carry "N playlists" in their label; that disambiguates them from the
         // bhajan "Open {title}" buttons. The collection detail screen scrolls itself to the top
