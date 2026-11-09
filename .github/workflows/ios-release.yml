@@ -1,0 +1,327 @@
+name: iOS Signed Release
+
+# Manually triggered only. This workflow is the ONLY place Apple signing
+# credentials are used, and they live in the protected `ios-release`
+# environment so pushes, pull requests, and forks can never reach them.
+# The unsigned validation workflow (.github/workflows/ios-cloud-build.yml)
+# stays separate and keeps running on pushes and pull requests.
+on:
+  workflow_dispatch:
+    inputs:
+      action:
+        description: 'archive-only signs locally on the runner; validate and upload contact App Store Connect'
+        type: choice
+        required: true
+        default: archive-only
+        options:
+          - archive-only
+          - validate
+          - upload
+      build_number:
+        description: 'Optional CURRENT_PROJECT_VERSION override (digits only). Leave empty to archive the committed value.'
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ios-release
+  cancel-in-progress: false
+
+jobs:
+  signed-release:
+    name: Sign, export, and optionally upload to App Store Connect
+    # Fork clones of this repository must not run a job that requests the
+    # credential-bearing environment.
+    if: github.repository == 'SigProcess/Bhaavamritdhaara-Purushottam-Bhaiya-Dwara'
+    runs-on: macos-26
+    environment: ios-release
+    timeout-minutes: 120
+
+    env:
+      ARCHIVE_PATH: ${{ runner.temp }}/build/Bhaavamrit.xcarchive
+      DERIVED_DATA_PATH: ${{ runner.temp }}/build/DerivedData
+      EXPORT_OPTIONS_PATH: ${{ runner.temp }}/signing/ExportOptions.plist
+      EXPORT_PATH: ${{ runner.temp }}/export
+      KEYCHAIN_PATH: ${{ runner.temp }}/signing/ios-release.keychain-db
+      PROFILE_PATH: ${{ runner.temp }}/signing/profile.mobileprovision
+      CERTIFICATE_PATH: ${{ runner.temp }}/signing/distribution.p12
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: package-lock.json
+
+      - name: Record toolchain versions
+        run: |
+          set -euo pipefail
+          sw_vers
+          node --version
+          npm --version
+          xcode-select --print-path
+          xcodebuild -version
+
+      - name: Set reproducible build timestamp
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >> "$GITHUB_ENV"
+
+      - name: Install locked dependencies
+        run: npm ci
+
+      - name: Apply build number override
+        if: inputs.build_number != ''
+        env:
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          case "$BUILD_NUMBER" in
+            ''|*[!0-9]*)
+              echo "build_number must contain digits only." >&2
+              exit 1
+              ;;
+          esac
+          project_file=ios/App/App.xcodeproj/project.pbxproj
+          sed -i.bak -E "s/CURRENT_PROJECT_VERSION = [0-9.]+;/CURRENT_PROJECT_VERSION = ${BUILD_NUMBER};/g" "$project_file"
+          rm -f "${project_file}.bak"
+          applied=$(grep -c "CURRENT_PROJECT_VERSION = ${BUILD_NUMBER};" "$project_file" || true)
+          if [ "$applied" -ne 2 ]; then
+            echo "Expected 2 CURRENT_PROJECT_VERSION settings, rewrote ${applied}." >&2
+            exit 1
+          fi
+          echo "Archiving build number ${BUILD_NUMBER} (committed project file is unchanged in git)."
+
+      # Same gate the unsigned workflow runs: typecheck, tests, catalog
+      # generation and parity, privacy and release metadata, Vite build,
+      # Capacitor sync, iOS package contents, unsigned archive. A signed
+      # build therefore cannot ship anything the unsigned gate rejects.
+      - name: Run release readiness checks
+        run: npm run release:readiness
+
+      - name: Import signing assets into a temporary keychain
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_P12_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.APPLE_DISTRIBUTION_CERTIFICATE_PASSWORD }}
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          PROFILE_BASE64: ${{ secrets.APPLE_PROVISIONING_PROFILE_BASE64 }}
+        run: |
+          set -euo pipefail
+          for name in CERTIFICATE_BASE64 CERTIFICATE_PASSWORD KEYCHAIN_PASSWORD PROFILE_BASE64; do
+            if [ -z "${!name}" ]; then
+              echo "Required secret for ${name} is not set in the ios-release environment." >&2
+              exit 1
+            fi
+          done
+
+          mkdir -p "$(dirname "$KEYCHAIN_PATH")"
+          printf '%s' "$CERTIFICATE_BASE64" | base64 --decode > "$CERTIFICATE_PATH"
+          printf '%s' "$PROFILE_BASE64" | base64 --decode > "$PROFILE_PATH"
+          chmod 600 "$CERTIFICATE_PATH" "$PROFILE_PATH"
+
+          security create-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security set-keychain-settings -lut 7200 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          security import "$CERTIFICATE_PATH" \
+            -k "$KEYCHAIN_PATH" \
+            -P "$CERTIFICATE_PASSWORD" \
+            -f pkcs12 \
+            -t cert \
+            -T /usr/bin/codesign \
+            -T /usr/bin/security \
+            > /dev/null
+          security set-key-partition-list \
+            -S 'apple-tool:,apple:,codesign:' \
+            -s \
+            -k "$KEYCHAIN_PASSWORD" \
+            "$KEYCHAIN_PATH" \
+            > /dev/null
+          security list-keychains -d user -s "$KEYCHAIN_PATH" $(security list-keychains -d user | tr -d '"')
+
+          if ! security find-identity -v -p codesigning "$KEYCHAIN_PATH" | grep -q 'Apple Distribution'; then
+            echo "No Apple Distribution signing identity was found in the imported certificate." >&2
+            exit 1
+          fi
+          echo "Imported an Apple Distribution identity into the temporary keychain."
+
+          profile_uuid="$(security cms -D -i "$PROFILE_PATH" | plutil -extract UUID raw -o - -)"
+          echo "::add-mask::${profile_uuid}"
+          profile_dir="$HOME/Library/MobileDevice/Provisioning Profiles"
+          mkdir -p "$profile_dir"
+          cp "$PROFILE_PATH" "${profile_dir}/${profile_uuid}.mobileprovision"
+          rm -f "$CERTIFICATE_PATH"
+
+      - name: Write export options
+        env:
+          PROFILE_NAME: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          for name in PROFILE_NAME TEAM_ID; do
+            if [ -z "${!name}" ]; then
+              echo "Required secret for ${name} is not set in the ios-release environment." >&2
+              exit 1
+            fi
+          done
+          # Reject characters that would need XML escaping before they reach
+          # the plist below. Team IDs and profile names do not contain them.
+          if ! printf '%s' "$TEAM_ID" | grep -Eq '^[A-Za-z0-9]+$'; then
+            echo 'APPLE_TEAM_ID must be alphanumeric.' >&2
+            exit 1
+          fi
+          if ! printf '%s' "$PROFILE_NAME" | grep -Eq '^[A-Za-z0-9 ._:-]+$'; then
+            echo 'APPLE_PROVISIONING_PROFILE_NAME contains unsupported characters.' >&2
+            exit 1
+          fi
+
+          mkdir -p "$(dirname "$EXPORT_OPTIONS_PATH")"
+          # Secret values are substituted by the shell and never echoed. The
+          # file is linted but never printed. `destination = export` keeps the
+          # upload a separate, explicit step.
+          cat > "$EXPORT_OPTIONS_PATH" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>destination</key>
+            <string>export</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>signingCertificate</key>
+            <string>Apple Distribution</string>
+            <key>teamID</key>
+            <string>${TEAM_ID}</string>
+            <key>uploadSymbols</key>
+            <true/>
+            <key>stripSwiftSymbols</key>
+            <true/>
+            <key>manageAppVersionAndBuildNumber</key>
+            <false/>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.bhaavamrit.app</key>
+              <string>${PROFILE_NAME}</string>
+            </dict>
+          </dict>
+          </plist>
+          PLIST
+          chmod 600 "$EXPORT_OPTIONS_PATH"
+          /usr/bin/plutil -lint "$EXPORT_OPTIONS_PATH" > /dev/null
+          echo 'Export options written for method app-store-connect.'
+
+      - name: Archive signed application
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+          PROFILE_NAME: ${{ secrets.APPLE_PROVISIONING_PROFILE_NAME }}
+          TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          set -euo pipefail
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          mkdir -p "$(dirname "$ARCHIVE_PATH")"
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath "$DERIVED_DATA_PATH" \
+            -archivePath "$ARCHIVE_PATH" \
+            CODE_SIGN_STYLE=Manual \
+            CODE_SIGN_IDENTITY='Apple Distribution' \
+            DEVELOPMENT_TEAM="$TEAM_ID" \
+            PROVISIONING_PROFILE_SPECIFIER="$PROFILE_NAME" \
+            OTHER_CODE_SIGN_FLAGS="--keychain $KEYCHAIN_PATH" \
+            archive
+
+      - name: Export signed IPA
+        env:
+          KEYCHAIN_PASSWORD: ${{ secrets.IOS_KEYCHAIN_PASSWORD }}
+        run: |
+          set -euo pipefail
+          security unlock-keychain -p "$KEYCHAIN_PASSWORD" "$KEYCHAIN_PATH"
+          rm -rf "$EXPORT_PATH"
+          xcodebuild -exportArchive \
+            -archivePath "$ARCHIVE_PATH" \
+            -exportOptionsPlist "$EXPORT_OPTIONS_PATH" \
+            -exportPath "$EXPORT_PATH"
+          ipa_path="$(find "$EXPORT_PATH" -maxdepth 1 -name '*.ipa' -type f | head -n 1)"
+          if [ -z "$ipa_path" ]; then
+            echo "Export produced no .ipa file." >&2
+            exit 1
+          fi
+          echo "IPA_PATH=${ipa_path}" >> "$GITHUB_ENV"
+          echo "Exported $(basename "$ipa_path") ($(du -h "$ipa_path" | cut -f1))."
+          /usr/bin/codesign --verify --strict --verbose=2 "$ARCHIVE_PATH/Products/Applications/App.app"
+
+      - name: Install App Store Connect API key
+        if: inputs.action != 'archive-only'
+        env:
+          API_KEY_BASE64: ${{ secrets.APP_STORE_CONNECT_PRIVATE_KEY_BASE64 }}
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          for name in API_KEY_BASE64 API_KEY_ID API_ISSUER_ID; do
+            if [ -z "${!name}" ]; then
+              echo "Required secret for ${name} is not set in the ios-release environment." >&2
+              exit 1
+            fi
+          done
+          key_dir="$HOME/.appstoreconnect/private_keys"
+          mkdir -p "$key_dir"
+          chmod 700 "$key_dir"
+          printf '%s' "$API_KEY_BASE64" | base64 --decode > "${key_dir}/AuthKey_${API_KEY_ID}.p8"
+          chmod 600 "${key_dir}/AuthKey_${API_KEY_ID}.p8"
+          if ! head -n 1 "${key_dir}/AuthKey_${API_KEY_ID}.p8" | grep -q 'BEGIN PRIVATE KEY'; then
+            echo "Decoded App Store Connect key is not a PEM private key." >&2
+            exit 1
+          fi
+          echo "App Store Connect API key installed for this job only."
+
+      - name: Validate build with App Store Connect
+        if: inputs.action != 'archive-only'
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcrun altool --validate-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"
+
+      # Uploading places the build in App Store Connect, which is what feeds
+      # TestFlight. It does NOT submit the app for App Store review; that
+      # stays a deliberate human action in App Store Connect.
+      - name: Upload build to App Store Connect
+        if: inputs.action == 'upload'
+        env:
+          API_KEY_ID: ${{ secrets.APP_STORE_CONNECT_KEY_ID }}
+          API_ISSUER_ID: ${{ secrets.APP_STORE_CONNECT_ISSUER_ID }}
+        run: |
+          set -euo pipefail
+          xcrun altool --upload-app \
+            --type ios \
+            --file "$IPA_PATH" \
+            --apiKey "$API_KEY_ID" \
+            --apiIssuer "$API_ISSUER_ID"
+          echo 'Upload accepted. The build must finish processing before it appears in TestFlight.'
+          echo 'No App Store review submission was made.'
+
+      - name: Remove credentials from the runner
+        if: always()
+        run: |
+          set -uo pipefail
+          security list-keychains -d user -s login.keychain-db || true
+          security delete-keychain "$KEYCHAIN_PATH" || true
+          rm -rf "$HOME/.appstoreconnect/private_keys"
+          rm -rf "$HOME/Library/MobileDevice/Provisioning Profiles"
+          rm -rf "$(dirname "$KEYCHAIN_PATH")"
+          echo 'Temporary keychain, provisioning profile, API key, and export options removed.'
