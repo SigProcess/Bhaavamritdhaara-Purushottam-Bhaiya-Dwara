@@ -266,3 +266,117 @@ describe('VideoPlayer failure recovery', () => {
     expect(media.handles[0].playCalls).toHaveLength(1)
   })
 })
+
+
+describe('VideoPlayer selection brings the player into view', () => {
+  interface ScrollCall {
+    readonly element: Element
+    readonly options: unknown
+  }
+
+  function stubScrollIntoView(): ScrollCall[] {
+    const calls: ScrollCall[] = []
+    Element.prototype.scrollIntoView = vi.fn(function (
+      this: Element,
+      options?: unknown,
+    ) {
+      calls.push({ element: this, options })
+    }) as unknown as Element['scrollIntoView']
+    return calls
+  }
+
+  afterEach(() => {
+    // jsdom ships no `scrollIntoView`, so the clean state is its absence.
+    delete (Element.prototype as Partial<Element>).scrollIntoView
+  })
+
+  it('scrolls the player surface to the top of the viewport on selection', async () => {
+    const calls = stubScrollIntoView()
+    const media = new FakeExternalMediaService()
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].element).toHaveClass('video-player-surface')
+    expect(calls[0].options).toEqual({ block: 'start' })
+    expect(Object.keys(calls[0].options as object)).toEqual(['block'])
+    await waitFor(() => expect(media.prepareCalls).toHaveLength(1))
+  })
+
+  it('scrolls again when the already-selected video is re-tapped', async () => {
+    const calls = stubScrollIntoView()
+    const media = new FakeExternalMediaService()
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+      />,
+    )
+
+    const selected = screen.getByRole('option', { name: /हिन्दी प्रवचन/ })
+    expect(selected).toHaveAttribute('aria-selected', 'true')
+    fireEvent.click(selected)
+
+    expect(calls).toHaveLength(1)
+    expect(calls[0].element).toHaveClass('video-player-surface')
+    await waitFor(() => expect(media.prepareCalls).toHaveLength(1))
+  })
+
+  it('scrolls even when the playback request fails', async () => {
+    const calls = stubScrollIntoView()
+    const media = new FakeExternalMediaService()
+    media.failNextRequest('YOUTUBE_PLAYBACK_FAILED')
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+        networkService={new FakeNetworkService('online')}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
+
+    expect(calls).toHaveLength(1)
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'English Discourse is unavailable in the embedded player.',
+    )
+  })
+
+  it('selects and starts playback where scrollIntoView is unavailable', async () => {
+    delete (Element.prototype as Partial<Element>).scrollIntoView
+    const media = new FakeExternalMediaService()
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+      />,
+    )
+
+    expect(Element.prototype.scrollIntoView).toBeUndefined()
+    fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
+
+    expect(screen.getByRole('option', { name: /English Discourse/ })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    )
+    await waitFor(() => expect(media.prepareCalls).toHaveLength(1))
+    expect(media.prepareCalls[0]).toMatchObject({
+      playlistId: recordedPlaylist.id,
+      videoId: recordedPlaylist.videos![1].id,
+    })
+  })
+})

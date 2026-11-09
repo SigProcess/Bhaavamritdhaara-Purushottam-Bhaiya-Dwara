@@ -44,8 +44,24 @@ function installApi(): void {
   }
 }
 
+/** Reproduces YouTube reporting a state in its first message, before `onReady`. */
+class EarlyStateYouTubePlayer extends FakeYouTubePlayer {
+  constructor(target: HTMLElement, options: CapturedOptions) {
+    super(target, options)
+    options.events.onStateChange({ data: 1 })
+  }
+}
+
+function installEarlyStateApi(): void {
+  installs.length = 0
+  window.YT = {
+    Player: EarlyStateYouTubePlayer as never,
+    PlayerState: { ENDED: 0, PLAYING: 1, PAUSED: 2 },
+  }
+}
+
 describe('YouTubeIframeExternalMediaService', () => {
-  it('resolves a stable video ID and creates a non-autoplay controllable player', async () => {
+  it('resolves a stable video ID and creates an autoplaying controllable player', async () => {
     installApi()
     const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
     const target = document.createElement('div')
@@ -58,7 +74,9 @@ describe('YouTubeIframeExternalMediaService', () => {
     }, target)
 
     expect(installs[0].options.videoId).toBe(video.sourceVideoId)
-    expect(installs[0].options.playerVars.autoplay).toBe(0)
+    expect(installs[0].options.playerVars.autoplay).toBe(1)
+    expect(installs[0].options.playerVars).not.toHaveProperty('mute')
+    expect(installs[0].options.playerVars).not.toHaveProperty('muted')
     handle.play()
     expect((handle as unknown as { player: FakeYouTubePlayer }).player.playVideo).toHaveBeenCalledOnce()
 
@@ -66,6 +84,24 @@ describe('YouTubeIframeExternalMediaService', () => {
     handle.subscribeState(listener)
     installs[0].options.events.onStateChange({ data: 1 })
     expect(listener).toHaveBeenCalledWith('playing')
+  })
+
+  it('replays a state observed before the subscriber attaches', async () => {
+    installEarlyStateApi()
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const playlist = canonicalCatalogFixture.collectionPlaylists[0]
+    const video = playlist.videos![0]
+    const handle = await service.prepare({
+      requestId: 'playback-early-state' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, document.createElement('div'))
+
+    const listener = vi.fn()
+    handle.subscribeState(listener)
+
+    expect(listener).toHaveBeenCalledWith('playing')
+    expect(listener).toHaveBeenCalledOnce()
   })
 
   it('uses the canonical playlist identifier for non-autoplay fallback', async () => {

@@ -132,6 +132,7 @@ function findPlaylist(catalog: Catalog, request: PlaybackRequest): PlaylistRecor
 class YouTubePlayerHandle implements PlayerHandle {
   readonly selectedVideoId
   private readonly listeners = new Set<(state: ExternalMediaPlayerState) => void>()
+  private lastState: ExternalMediaPlayerState | undefined
 
   constructor(
     readonly requestId: PlaybackRequestId,
@@ -155,12 +156,19 @@ class YouTubePlayerHandle implements PlayerHandle {
     this.player.seekTo(Math.max(0, positionSeconds), true)
   }
 
+  /**
+   * YouTube can report a state before the consumer subscribes, because the
+   * player's first message can arrive ahead of `onReady`. Replaying the last
+   * state keeps a late subscriber from missing an already-started playback.
+   */
   subscribeState(listener: (state: ExternalMediaPlayerState) => void): Unsubscribe {
     this.listeners.add(listener)
+    if (this.lastState !== undefined) listener(this.lastState)
     return () => this.listeners.delete(listener)
   }
 
   emit(state: ExternalMediaPlayerState): void {
+    this.lastState = state
     for (const listener of this.listeners) listener(state)
   }
 
@@ -189,6 +197,12 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
 
   constructor(private readonly catalog: Catalog) {}
 
+  /**
+   * An explicit video request starts inside the iframe's own load
+   * (`autoplay: 1`), because a cross-origin `playVideo()` from the parent frame
+   * has no user activation of its own and Chrome for Android rejects it. The
+   * playlist fallback keeps `autoplay: 0` so merely opening a playlist is silent.
+   */
   async prepare(request: PlaybackRequest, target: HTMLElement): Promise<PlayerHandle> {
     const playlist = findPlaylist(this.catalog, request)
     const video = request.videoId === undefined
@@ -210,10 +224,11 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
     return new Promise<PlayerHandle>((resolve, reject) => {
       let handle: YouTubePlayerHandle | undefined
       let ready = false
+      let stateBeforeReady: ExternalMediaPlayerState | undefined
       const player = new api.Player(playerTarget, {
         ...(video ? { videoId: video.sourceVideoId } : {}),
         playerVars: video
-          ? { autoplay: 0, rel: 0, playsinline: 1 }
+          ? { autoplay: 1, rel: 0, playsinline: 1 }
           : {
               autoplay: 0,
               rel: 0,
@@ -230,13 +245,24 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
               player,
             )
             ready = true
+            if (stateBeforeReady !== undefined) handle.emit(stateBeforeReady)
             resolve(handle)
           },
           onStateChange: ({ data }) => {
-            if (!handle) return
-            if (data === api.PlayerState.PLAYING) handle.emit('playing')
-            if (data === api.PlayerState.PAUSED) handle.emit('paused')
-            if (data === api.PlayerState.ENDED) handle.emit('ended')
+            const state: ExternalMediaPlayerState | undefined =
+              data === api.PlayerState.PLAYING
+                ? 'playing'
+                : data === api.PlayerState.PAUSED
+                  ? 'paused'
+                  : data === api.PlayerState.ENDED
+                    ? 'ended'
+                    : undefined
+            if (state === undefined) return
+            if (!handle) {
+              stateBeforeReady = state
+              return
+            }
+            handle.emit(state)
           },
           onError: () => {
             if (ready && handle) handle.emit('failed')

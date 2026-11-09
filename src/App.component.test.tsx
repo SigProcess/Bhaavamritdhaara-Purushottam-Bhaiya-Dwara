@@ -27,10 +27,25 @@ vi.mock('./components/PlaylistSections', () => ({
     activeRoute?: { kind: string }
     onOpenRoute?: (route: unknown, focusTargetId: string) => void
     onBack?: () => void
-  }) => activeRoute?.kind === 'collection' ? (
+  }) => activeRoute?.kind === 'playlist' ? (
+    <section aria-labelledby="playlist-screen-title">
+      <button type="button" onClick={onBack}>Back to the collection</button>
+      <h1 id="playlist-screen-title" tabIndex={-1}>Test playlist</h1>
+    </section>
+  ) : activeRoute?.kind === 'collection' ? (
     <section aria-labelledby="collection-screen-title">
       <button type="button" onClick={onBack}>Back to collections</button>
       <h1 id="collection-screen-title" tabIndex={-1}>Test collection</h1>
+      <button
+        id="playlist-test"
+        type="button"
+        onClick={() => onOpenRoute?.(
+          { kind: 'playlist', playlistId: 'playlist:test', collectionId: 'collection:test' },
+          'playlist-test',
+        )}
+      >
+        Open test playlist
+      </button>
     </section>
   ) : (
     <button
@@ -119,6 +134,7 @@ describe('App shell Home route', () => {
 describe('App shell catalog routing', () => {
   it('pushes collection navigation, focuses its heading, and restores its trigger', async () => {
     const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
     render(<App />)
 
     const trigger = screen.getByRole('button', { name: 'Open test collection' })
@@ -129,10 +145,40 @@ describe('App shell catalog routing', () => {
       name: 'Bhaavamritdhaara — Purushottam Bhaiya Dwara',
     })).not.toBeInTheDocument()
     expect(screen.getByRole('heading', { level: 1, name: 'Test collection' })).toHaveFocus()
+    expect(scrollTo).toHaveBeenCalledWith({ top: 0, left: 0, behavior: 'instant' })
 
     await user.click(screen.getByRole('button', { name: 'Back to collections' }))
     await waitFor(() => expect(
       screen.getByRole('button', { name: 'Open test collection' }),
     ).toHaveFocus())
+
+    // Back restores the recorded offset positionally and must not reset to top.
+    expect(scrollTo.mock.calls.filter(([first]) => typeof first === 'object')).toHaveLength(1)
+    expect(scrollTo).toHaveBeenCalledWith(0, 0)
+    scrollTo.mockRestore()
+  })
+
+  it('resets the scroll again when a playlist opens from a collection', async () => {
+    const user = userEvent.setup()
+    const scrollTo = vi.spyOn(window, 'scrollTo').mockImplementation(() => undefined)
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Open test collection' }))
+    await user.click(screen.getByRole('button', { name: 'Open test playlist' }))
+
+    expect(document.querySelector('.app')).toHaveAttribute('data-route', 'playlist')
+    expect(screen.getByRole('heading', { level: 1, name: 'Test playlist' })).toHaveFocus()
+    expect(scrollTo.mock.calls.filter(([first]) => typeof first === 'object')).toEqual([
+      [{ top: 0, left: 0, behavior: 'instant' }],
+      [{ top: 0, left: 0, behavior: 'instant' }],
+    ])
+
+    await user.click(screen.getByRole('button', { name: 'Back to the collection' }))
+    await waitFor(() => expect(
+      screen.getByRole('button', { name: 'Open test playlist' }),
+    ).toHaveFocus())
+
+    expect(scrollTo.mock.calls.filter(([first]) => typeof first === 'object')).toHaveLength(2)
+    scrollTo.mockRestore()
   })
 })

@@ -138,6 +138,10 @@ export default function AppShell() {
     const headingId = activeRoute.kind === 'collection'
       ? 'collection-screen-title'
       : 'playlist-screen-title'
+    // A forward route change inherits the previous view's scroll offset, clamped
+    // to the shorter page, which lands the user at its bottom. `instant` avoids
+    // animating the reset against `html { scroll-behavior: smooth }`.
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     document.getElementById(headingId)?.focus({ preventScroll: true })
   }, [activeRoute.kind, catalogRouteKey])
 

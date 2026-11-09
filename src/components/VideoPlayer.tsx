@@ -99,6 +99,7 @@ export default function VideoPlayer({
   const registryRef = useRef(registryState)
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false)
   const mountRef = useRef<HTMLDivElement>(null)
+  const surfaceRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<PlayerHandle | undefined>(undefined)
   const activeRequestRef = useRef<PlaybackRequest | undefined>(undefined)
   const preparedRequestIdsRef = useRef(new Set<PlaybackRequestId>())
@@ -317,6 +318,11 @@ export default function VideoPlayer({
 
   const selectVideo = useCallback((videoId: VideoId) => {
     if (state.mode !== 'recorded-videos') return
+    // The video list page-scrolls, so a tap far down the list leaves the player
+    // off-screen. `behavior` is omitted so the scrolling box's CSS decides:
+    // smooth normally, instant under `prefers-reduced-motion: reduce`. The
+    // optional call covers jsdom and older WebViews without `scrollIntoView`.
+    surfaceRef.current?.scrollIntoView?.({ block: 'start' })
     if (videoId !== state.selectedVideoId) {
       dispatch({ type: 'select-video', playlistId: playlist.id, videoId })
       beginPlayback(videoId)
@@ -375,7 +381,7 @@ export default function VideoPlayer({
         </p>
       ) : (
         <>
-          <div className="video-player-surface">
+          <div className="video-player-surface" ref={surfaceRef}>
             <div className="video-player-media" ref={mountRef} />
             {state.mode === 'recorded-videos' && !handleRef.current && selectedVideo && (
               <img
