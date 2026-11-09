@@ -91,27 +91,63 @@ final class StoreScreenshotTests: XCTestCase {
             return
         }
 
-        // The native reader is a full-screen UINavigationController with a "Done" bar button.
-        let done = app.buttons["Done"]
-        let appeared = done.waitForExistence(timeout: longTimeout)
-        note("native-reader-visible=\(appeared)")
+        let appeared = readerIsVisible(timeout: longTimeout)
+        note("native-reader-visible=\(appeared) close-label=\(readerCloseButton.exists ? readerCloseButton.label : "none")")
         guard appeared else {
-            note("SKIPPED 01: native PDF reader did not present")
+            note("SKIPPED 01: native PDF reader did not present (tried buttons[\"Zoom In\"] and label BEGINSWITH \"Close \")")
             attach(name: "01-failure-hierarchy.txt", uti: "public.plain-text", payload: Data(app.debugDescription.utf8))
             return
         }
         sleep(3.0) // let PDFKit finish laying out and rendering page 1
         capture("01-offline-pdf-reader")
 
-        done.tap()
+        note("native-reader-dismissed=\(dismissReaderIfPresent())")
+    }
+
+    // MARK: - Reader detection
+
+    /// `DocumentViewController.configureNavigationControls()` builds the bar button with
+    /// `title: "Done"` and then assigns `accessibilityLabel = "Close {title}"`. On a
+    /// `UIBarButtonItem` that assignment *replaces* the title for accessibility queries, so
+    /// `app.buttons["Done"]` can never match and a literal lookup just burns its full timeout.
+    /// Match the `Close ` prefix instead, and prefer the toolbar's fixed `Zoom In`/`Zoom Out`
+    /// labels from `makeToolbarButton(title:)` as the presence signal: those are
+    /// language-independent and identical for every document.
+    private var readerCloseButton: XCUIElement {
+        app.buttons.matching(NSPredicate(format: "label BEGINSWITH %@", "Close ")).firstMatch
+    }
+
+    private func readerIsVisible(timeout: TimeInterval) -> Bool {
+        if app.buttons["Zoom In"].waitForExistence(timeout: timeout) { return true }
+        return readerCloseButton.exists
+    }
+
+    @discardableResult
+    private func dismissReaderIfPresent() -> Bool {
+        let close = readerCloseButton
+        guard close.exists else { return false }
+        close.tap()
         sleep(settle)
-        note("native-reader-dismissed=\(!done.exists)")
+        let restored = app.links["Bhajan Finder"].waitForExistence(timeout: shortTimeout)
+        note("reader-dismissed home-restored=\(restored)")
+        return true
+    }
+
+    /// Presenting the reader removes the web view from the accessibility tree entirely, so a
+    /// leftover modal makes every later selector fail against a hierarchy that no longer
+    /// contains the page. Each step therefore re-establishes the home screen itself rather
+    /// than trusting the previous step to have left things tidy.
+    private func prepareHome() {
+        dismissReaderIfPresent()
+        scrollToTop()
+        note("home-ready=\(app.links["Bhajan Finder"].exists)")
     }
 
     // MARK: - 02 Bhajan Finder / search
 
     private func captureBhajanFinder() {
         note("step=02-bhajan-finder")
+        prepareHome()
         guard tapLink(["Bhajan Finder", "Bhajans"]) else {
             note("SKIPPED 02: no Bhajan Finder anchor link")
             return
@@ -139,6 +175,7 @@ final class StoreScreenshotTests: XCTestCase {
 
     private func captureCollectionsGrid() {
         note("step=03-collections-grid")
+        prepareHome()
         guard tapLink(["Pravachans", "Lekh", "Vani Vishleshan"]) else {
             note("SKIPPED 03: no collections anchor link")
             return
@@ -151,6 +188,7 @@ final class StoreScreenshotTests: XCTestCase {
 
     private func captureVideoScreens() {
         note("step=04-playlist")
+        prepareHome()
 
         // Collection cards carry "N playlists" in their label; that disambiguates them from the
         // bhajan "Open {title}" buttons. The collection detail screen scrolls itself to the top
@@ -270,6 +308,32 @@ final class StoreScreenshotTests: XCTestCase {
         Thread.sleep(forTimeInterval: seconds)
     }
 
+    /// WebKit reports element frames in page coordinates, not window coordinates, so at scroll
+    /// offset 0 most targets report `isHittable == false` purely because they sit below the
+    /// viewport — the collection cards start around y≈2694 and the books section near y≈9000
+    /// against an 874pt window. Swipe until the element is actually hittable, bounded in both
+    /// directions so a genuinely absent element cannot spin forever.
+    private func scrollIntoView(_ element: XCUIElement, attempts: Int = 12) -> Bool {
+        guard element.exists else { return false }
+        if element.isHittable { return true }
+        for _ in 0..<attempts {
+            app.swipeUp()
+            sleep(0.4)
+            if element.isHittable { return true }
+        }
+        for _ in 0..<(attempts * 2) {
+            app.swipeDown()
+            sleep(0.4)
+            if element.isHittable { return true }
+        }
+        return element.isHittable
+    }
+
+    private func scrollToTop(attempts: Int = 16) {
+        for _ in 0..<attempts { app.swipeDown() }
+        sleep(settle)
+    }
+
     private func labels(of query: XCUIElementQuery) -> String {
         let all = query.allElementsBoundByIndex.prefix(40).map { element -> String in
             let label = element.label.replacingOccurrences(of: "\n", with: " ")
@@ -281,13 +345,13 @@ final class StoreScreenshotTests: XCTestCase {
     private func tapLink(_ names: [String]) -> Bool {
         for name in names {
             let link = app.links[name]
-            if link.waitForExistence(timeout: shortTimeout), link.isHittable {
+            if link.waitForExistence(timeout: shortTimeout), scrollIntoView(link) {
                 link.tap()
                 note("tapped link \u{201C}\(name)\u{201D}")
                 return true
             }
         }
-        note("no link tapped from \(names)")
+        note("no link tapped from \(names) (exists but not hittable after scrolling, or absent)")
         return false
     }
 
@@ -308,12 +372,12 @@ final class StoreScreenshotTests: XCTestCase {
         for element in matches.allElementsBoundByIndex.prefix(25) {
             let label = element.label
             if exclusions.contains(where: { label.localizedCaseInsensitiveContains($0) }) { continue }
-            guard element.exists, element.isHittable else { continue }
+            guard element.exists, scrollIntoView(element) else { continue }
             element.tap()
             note("tapped button \u{201C}\(label)\u{201D} (\(description))")
             return true
         }
-        note("matched \(description) but nothing was hittable: \(labels(of: matches))")
+        note("matched \(description) but nothing became hittable after scrolling: \(labels(of: matches))")
         return false
     }
 
