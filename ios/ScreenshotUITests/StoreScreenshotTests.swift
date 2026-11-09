@@ -139,8 +139,37 @@ final class StoreScreenshotTests: XCTestCase {
     /// than trusting the previous step to have left things tidy.
     private func prepareHome() {
         dismissReaderIfPresent()
+        forceDismissKeyboard()
         scrollToTop()
-        note("home-ready=\(app.links["Bhajan Finder"].exists)")
+        note("home-ready=\(app.links["Bhajan Finder"].exists) keyboards=\(app.keyboards.count)")
+    }
+
+    /// The software keyboard is the single most destructive piece of state in this run: left up,
+    /// it covers the lower half of every capture AND its floating accessory bar overlaps page
+    /// content, and anchor taps underneath it stop scrolling the page. Run 42670951760 shipped
+    /// a "collections grid" that was really the hero with a keyboard over it for exactly this
+    /// reason. So dismiss aggressively and verify, rather than trusting one keystroke.
+    @discardableResult
+    private func forceDismissKeyboard() -> Bool {
+        for attempt in 1...4 {
+            guard app.keyboards.count > 0 else {
+                if attempt > 1 { note("keyboard-gone-after-attempt=\(attempt - 1)") }
+                return true
+            }
+            for key in ["return", "Return", "search", "Search", "go", "Go", "done", "Done"] {
+                let button = app.keyboards.buttons[key]
+                if button.exists, button.isHittable { button.tap(); break }
+            }
+            sleep(0.9)
+            if app.keyboards.count == 0 { note("keyboard-dismissed-via=key attempt=\(attempt)"); return true }
+
+            // Blur by tapping inert chrome well above the keyboard frame.
+            app.coordinate(withNormalizedOffset: CGVector(dx: 0.5, dy: 0.08)).tap()
+            sleep(0.9)
+        }
+        let gone = app.keyboards.count == 0
+        note("keyboard-dismissed=\(gone) (after 4 attempts)")
+        return gone
     }
 
     // MARK: - 02 Bhajan Finder / search
@@ -163,11 +192,18 @@ final class StoreScreenshotTests: XCTestCase {
             field.typeText("aanand")
             sleep(1.2)
             note("query-typed=true value=\(String(describing: field.value))")
-            dismissKeyboard()
+            if !forceDismissKeyboard() {
+                // Rather than ship a capture with half the screen under a keyboard, drop the
+                // query and show the idle finder, which is still a perfectly good store shot.
+                note("WARNING 02: keyboard would not dismiss; clearing query for a clean capture")
+                if tapFirstButton(labelContains: "Clear", excluding: []) { sleep(1.0) }
+                forceDismissKeyboard()
+            }
         } else {
             note("query-typed=false (search field unavailable); capturing idle finder")
         }
         sleep(settle)
+        note("pre-capture-keyboards=\(app.keyboards.count)")
         capture("02-bhajan-finder-search")
     }
 
@@ -181,6 +217,17 @@ final class StoreScreenshotTests: XCTestCase {
             return
         }
         sleep(settle + 0.8)
+        // Prove we actually left the hero before spending a capture on it. Run 42670951760
+        // captured the hero and labelled it "collections grid"; a size-correct PNG of the
+        // wrong screen is worse than a recorded skip, because it looks like a success.
+        let cards = app.buttons.matching(NSPredicate(format: "label CONTAINS %@", "playlists"))
+        let onGrid = cards.firstMatch.waitForExistence(timeout: shortTimeout)
+        note("collections-grid-reached=\(onGrid) cards=\(cards.count) keyboards=\(app.keyboards.count)")
+        guard onGrid else {
+            note("SKIPPED 03: never reached the collections grid")
+            attach(name: "03-failure-hierarchy.txt", uti: "public.plain-text", payload: Data(app.debugDescription.utf8))
+            return
+        }
         capture("03-collections-grid")
     }
 
