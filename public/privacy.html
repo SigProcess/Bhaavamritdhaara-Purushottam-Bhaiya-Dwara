@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#2C1810" />
+<meta name="robots" content="index, follow" />
+<title>Privacy Policy — Bhaavamrit | Bhaavamritdhaara, Purushottam Bhaiya Dwara</title>
+<meta name="description" content="Privacy policy for the Bhaavamrit iOS and Android apps and the Bhaavamritdhaara website: no accounts, no advertising, no developer analytics, and an honest account of the third parties involved in video playback and hosting." />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<!--
+  This page deliberately loads no web fonts, no scripts, and no images from any other origin,
+  so reading the privacy policy itself sends nothing to a third party. The typography below is
+  the same family stack the app requests, falling back to fonts already on the device.
+-->
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ivory:#F0E6D6;--parchment:#E8DCC8;--warm-white:#FBF7F0;
+    --saffron:#E07A1F;--saffron-deep:#C05E0A;
+    --crimson:#B03040;
+    --earth:#1A0A02;--earth-mid:#3A1E0A;
+    --gold:#C9933A;--gold-glow:rgba(201,147,58,0.18);
+    --text:#1E0E04;--text-secondary:#4A2E18;--text-muted:#6F5040;
+    --card-bg:#FFFCF7;--card-border:rgba(180,150,110,0.22);
+    --shadow-warm:rgba(120,70,30,0.08);--shadow-warm-lg:rgba(100,55,20,0.12);
+    --safe-left:env(safe-area-inset-left,0px);
+    --safe-right:env(safe-area-inset-right,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{min-width:320px;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    min-height:100vh;
+    background:linear-gradient(170deg,#F2E8D8 0%,#EDE0CE 40%,#E8D6C0 100%);
+    color:var(--text);
+    font-family:'Lora',Georgia,'Times New Roman',serif;
+    font-size:18px;line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    padding:0 calc(1.25rem + var(--safe-left)) calc(3rem + var(--safe-bottom)) calc(1.25rem + var(--safe-right));
+  }
+  .wrap{max-width:46rem;margin:0 auto}
+
+  header.page{
+    padding:2.75rem 0 1.5rem;text-align:center;
+    border-bottom:1px solid var(--card-border);margin-bottom:2rem;
+  }
+  .om{
+    width:52px;height:52px;margin:0 auto 1.1rem;border-radius:50%;
+    background:linear-gradient(135deg,var(--saffron),var(--crimson));
+    color:#fff;font-size:1.5rem;line-height:52px;
+    box-shadow:0 3px 14px rgba(224,122,31,0.35),0 0 0 4px rgba(224,122,31,0.08);
+  }
+  h1{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(1.85rem,7vw,2.6rem);line-height:1.18;font-weight:700;
+    color:var(--earth);letter-spacing:-0.01em;
+  }
+  .eyebrow{
+    font-size:0.74rem;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--saffron-deep);font-weight:600;margin-bottom:0.7rem;
+  }
+  .app-name{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:1.05rem;color:var(--text-secondary);margin-top:0.6rem;
+  }
+  .app-name .hi{font-family:'Noto Serif Devanagari','Lora',serif}
+  .updated{font-size:0.9rem;color:var(--text-muted);margin-top:0.9rem}
+  .badges{
+    display:flex;flex-wrap:wrap;gap:0.45rem;justify-content:center;margin-top:1.3rem;
+  }
+  .badge{
+    font-size:0.78rem;font-weight:600;letter-spacing:0.02em;
+    padding:0.3rem 0.72rem;border-radius:999px;
+    background:rgba(201,147,58,0.14);color:var(--earth-mid);
+    border:1px solid rgba(201,147,58,0.3);
+  }
+
+  .lede{
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-left:4px solid var(--saffron);border-radius:12px;
+    padding:1.25rem 1.3rem;margin-bottom:2.25rem;
+    box-shadow:0 2px 14px var(--shadow-warm);
+    font-size:1.04rem;
+  }
+
+  section{margin-bottom:2.25rem}
+  h2{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(1.3rem,5vw,1.6rem);line-height:1.3;font-weight:600;
+    color:var(--earth);margin-bottom:0.3rem;
+  }
+  h2 .num{color:var(--gold);font-size:0.78em;margin-right:0.45rem;font-weight:700}
+  h3{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:1.08rem;font-weight:600;color:var(--earth-mid);
+    margin:1.4rem 0 0.35rem;
+  }
+  .rule{
+    height:1px;margin:0.65rem 0 1.05rem;
+    background:linear-gradient(90deg,var(--gold),rgba(201,147,58,0));
+  }
+  p{margin-bottom:0.95rem;color:var(--text-secondary)}
+  p strong,li strong{color:var(--text);font-weight:600}
+  ul{margin:0 0 0.95rem 0;padding-left:1.15rem;color:var(--text-secondary)}
+  li{margin-bottom:0.55rem}
+  a{color:var(--saffron-deep);text-decoration:underline;text-underline-offset:2px}
+  a:hover{color:var(--crimson)}
+  a:focus-visible{outline:3px solid var(--earth);outline-offset:2px;border-radius:2px}
+  code{
+    font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+    font-size:0.86em;background:rgba(201,147,58,0.13);
+    padding:0.1em 0.38em;border-radius:4px;color:var(--earth-mid);
+    overflow-wrap:anywhere;
+  }
+
+  .card{
+    background:var(--card-bg);border:1px solid var(--card-border);border-radius:12px;
+    padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:0 1px 10px var(--shadow-warm);
+  }
+  .card h3{margin-top:0}
+  .card p:last-child,.card ul:last-child,.card li:last-child{margin-bottom:0}
+  .card.third-party{border-left:4px solid var(--crimson)}
+
+  .contact{
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-left:4px solid var(--gold);border-radius:12px;
+    padding:1.15rem 1.25rem;
+  }
+  .contact .email{font-size:1.06rem;font-weight:600;overflow-wrap:anywhere}
+
+  footer.page{
+    margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--card-border);
+    text-align:center;font-size:0.88rem;color:var(--text-muted);
+  }
+  footer.page p{color:var(--text-muted);margin-bottom:0.5rem}
+
+  @media (max-width:420px){
+    body{font-size:17px;padding-left:calc(1rem + var(--safe-left));padding-right:calc(1rem + var(--safe-right))}
+    .card,.lede,.contact{padding:1rem}
+    header.page{padding-top:2rem}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page">
+  <div class="om" aria-hidden="true">&#x0950;</div>
+  <p class="eyebrow">Privacy</p>
+  <h1>Privacy Policy</h1>
+  <p class="app-name">
+    <strong>Bhaavamrit</strong> &mdash; Bhaavamritdhaara, <span class="hi">पुरुषोत्तम भाईया द्वारा</span>
+  </p>
+  <p class="updated">Last updated: <strong>9 November 2026</strong></p>
+  <div class="badges">
+    <span class="badge">No accounts</span>
+    <span class="badge">No advertising</span>
+    <span class="badge">No developer analytics</span>
+    <span class="badge">No payments</span>
+    <span class="badge">Works offline</span>
+  </div>
+</header>
+
+<p class="lede">
+  Bhaavamrit has no sign-up, no advertising, no payments, and no analytics, telemetry, or
+  crash-reporting software of any kind. We do not operate a server that receives information about
+  you, and we do not build a profile of you. What this policy will not do is pretend that nothing
+  ever leaves your device: when you play a discourse or a bhajan video, playback happens inside
+  <strong>YouTube's own embedded player</strong>, so Google receives that request. Section 5 says
+  exactly who receives what, and when.
+</p>
+
+<section aria-labelledby="scope">
+  <h2 id="scope"><span class="num">1</span>What this policy covers</h2>
+  <div class="rule"></div>
+  <p>This single policy covers all three ways the project is published:</p>
+  <ul>
+    <li><strong>The Bhaavamrit iOS app</strong> (bundle identifier <code>com.bhaavamrit.app</code>), published on the App Store. It is built with Capacitor: the interface is the same devotional library, rendered in a web view inside the app, with native iOS code for reading and sharing PDF documents.</li>
+    <li><strong>The Bhaavamrit Android app</strong>, published on Google Play. It is a Trusted Web Activity, which means Android opens the website in a full-screen Chrome-provided window belonging to the app.</li>
+    <li><strong>The website</strong> at <a href="https://purushottambhaiya.netlify.app/">purushottambhaiya.netlify.app</a>, which can also be installed as a progressive web app.</li>
+  </ul>
+  <p>
+    The project is non-commercial and devotional. It does not sell anything, does not monetise
+    attention, and has nothing to gain from collecting data about you.
+  </p>
+</section>
+
+<section aria-labelledby="not-done">
+  <h2 id="not-done"><span class="num">2</span>What the app does not do</h2>
+  <div class="rule"></div>
+  <p>Each of the following is a statement about the published source code, not an aspiration:</p>
+  <ul>
+    <li><strong>No analytics, telemetry, crash reporting, or attribution software.</strong> There is no Google Analytics, Google Tag Manager, Firebase, Crashlytics, Sentry, Mixpanel, Amplitude, PostHog, Plausible, Hotjar, Segment, Datadog, Bugsnag, or advertising-measurement library anywhere in the app. The entire runtime dependency list of the web app is React and Capacitor; the only native iOS dependency is Capacitor itself.</li>
+    <li><strong>No tracking.</strong> The iOS privacy manifest declares no tracking, no tracking domains, and no collected data types. The app does not ask for the advertising identifier and does not use the App Tracking Transparency prompt, because it has nothing to track you with.</li>
+    <li><strong>No accounts, logins, or profiles.</strong> There is no sign-in screen, no password, no social login, and no user record anywhere.</li>
+    <li><strong>No payments, purchases, or subscriptions.</strong> There is no in-app purchase, no payment form, and no billing of any kind. Everything in the app is free.</li>
+    <li><strong>No advertising.</strong> No ad network, no sponsored placement, no interstitial.</li>
+    <li><strong>No developer-operated back end.</strong> The native iOS code makes no network requests at all; it reads documents that are already inside the app. There is no server of ours that logs your use of the app.</li>
+    <li><strong>No contact, photo, microphone, camera, location, or health access.</strong> The iOS app declares no such permission, so iOS will never prompt you for one.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="on-device">
+  <h2 id="on-device"><span class="num">3</span>What is stored on your device, and stays there</h2>
+  <div class="rule"></div>
+  <p>
+    The app is built to work offline. That requires storing things locally. None of it is
+    transmitted to us, because there is nowhere for it to be transmitted to.
+  </p>
+
+  <div class="card">
+    <h3>Devotional content bundled inside the app</h3>
+    <p>
+      The iOS app ships with 135 bhajan PDFs, 3 books, and the full content catalogue compiled into
+      the installed app, roughly 37&nbsp;MB. They are present from the moment you install it and
+      readable with no network connection whatsoever. Removing the app removes them.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Offline cache (website and installed web app)</h3>
+    <p>
+      On the website and the installable web app, a service worker stores a copy of the pages,
+      styles, scripts, and images so the site opens without a connection. It also keeps a
+      short-lived cache of video thumbnail images and of the web fonts the page uses. This cache
+      lives in your browser's storage for this site and is cleared when you clear site data or
+      uninstall the app.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Content catalogue storage</h3>
+    <p>
+      So that a content update can be validated before it is used, the app can keep catalogue
+      versions in a local database on the device (an IndexedDB database named
+      <code>bhaavamrit-catalog-store</code> in the browser; a folder inside the app's own storage on
+      iOS). It holds devotional catalogue metadata only &mdash; titles, identifiers, and file
+      references. It holds nothing about you. On iOS the app starts from the catalogue packaged
+      inside it and is not configured to request a remote one.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Things that exist only while the app is open</h3>
+    <p>
+      What you type into the Bhajan Finder, which screen you are on, which video is selected, and
+      whether the device is online are held in the app's memory while you use it and are gone when
+      the app closes. Search words are matched against the packaged catalogue on your device; they
+      are never sent anywhere.
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>What the app does not store</h3>
+    <p>
+      The app writes no cookies of its own, and uses neither <code>localStorage</code> nor
+      <code>sessionStorage</code>. On iOS it writes nothing to <code>UserDefaults</code> and nothing
+      to the keychain.
+    </p>
+  </div>
+</section>
+
+<section aria-labelledby="permissions">
+  <h2 id="permissions"><span class="num">4</span>Device permissions</h2>
+  <div class="rule"></div>
+  <ul>
+    <li><strong>iOS:</strong> none. The app declares no permission-usage descriptions at all, so iOS has nothing to ask you for.</li>
+    <li><strong>Android:</strong> notifications only (<code>POST_NOTIFICATIONS</code>), used to let you know about new bhajan or discourse playlists. You can refuse it, or turn it off later in Android settings, and the app keeps working.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="third-party">
+  <h2 id="third-party"><span class="num">5</span>Third parties that do receive something</h2>
+  <div class="rule"></div>
+  <p>
+    This is the part that matters. We collect nothing, but the app is not sealed off from the
+    internet, and we are not going to imply otherwise. Each provider below is governed by its own
+    privacy policy, not by ours, and we have no access to and no control over what it keeps.
+  </p>
+
+  <div class="card third-party">
+    <h3>YouTube and Google &mdash; video playback and thumbnails</h3>
+    <p>
+      Discourses and bhajan videos are <strong>not hosted by us</strong>. They play through
+      YouTube's embedded player. When you open a playlist or start a video, your device loads
+      YouTube's player code and video stream directly from Google, and video thumbnail images load
+      from <code>img.youtube.com</code>. As a result Google receives your IP address, information
+      about your device and software, and the identifier of the video or playlist concerned, and
+      <strong>may set cookies or similar identifiers</strong> on your device, depending on your
+      device and Google account settings. If you are signed in to a Google account, Google may
+      associate that activity with your account. If you choose to open a video in the YouTube app
+      or website, you leave Bhaavamrit entirely and YouTube's own terms apply.
+    </p>
+    <p>
+      Google's practices are described in the
+      <a href="https://policies.google.com/privacy" rel="noreferrer">Google Privacy Policy</a>,
+      and playback is subject to the
+      <a href="https://www.youtube.com/t/terms" rel="noreferrer">YouTube Terms of Service</a>.
+    </p>
+  </div>
+
+  <div class="card third-party">
+    <h3>Google Fonts &mdash; typography</h3>
+    <p>
+      The website and the app's interface request their typefaces from
+      <code>fonts.googleapis.com</code> and <code>fonts.gstatic.com</code>, so Google receives a
+      request from your device when those fonts are fetched. Once cached, they are served locally.
+      This policy page itself requests no fonts from anywhere.
+      See the <a href="https://policies.google.com/privacy" rel="noreferrer">Google Privacy Policy</a>.
+    </p>
+  </div>
+
+  <div class="card third-party">
+    <h3>Netlify &mdash; hosting</h3>
+    <p>
+      The website, the page you are reading, and the content the Android app displays are hosted by
+      Netlify, which keeps ordinary web-server records such as IP address, requested URL, referrer,
+      device and browser details, and the date and time. We do not add any tracking on top of that,
+      and we do not use those records to identify or profile visitors. The iOS app's own content is
+      read from inside the installed app, so simply opening and reading in the iOS app does not
+      involve Netlify.
+      See the <a href="https://www.netlify.com/privacy/" rel="noreferrer">Netlify Privacy Statement</a>.
+    </p>
+  </div>
+
+  <div class="card third-party">
+    <h3>Apple and Google Play &mdash; distribution</h3>
+    <p>
+      Installing and updating the app happens through the App Store or Google Play, and those stores
+      record that activity under their own policies. We receive only the aggregate, anonymous
+      statistics those stores choose to show developers; we cannot identify an individual user from
+      them. See the <a href="https://www.apple.com/legal/privacy/" rel="noreferrer">Apple Privacy Policy</a>
+      and the <a href="https://policies.google.com/privacy" rel="noreferrer">Google Privacy Policy</a>.
+    </p>
+  </div>
+</section>
+
+<section aria-labelledby="documents">
+  <h2 id="documents"><span class="num">6</span>Reading and sharing documents</h2>
+  <div class="rule"></div>
+  <p>
+    On iOS, opening a bhajan or a book opens Apple's own PDF reader inside the app, reading a file
+    that is already installed on your device. Nothing is downloaded and nothing is uploaded. The app
+    can only open documents that are listed in its own catalogue and stored in its own folders; it
+    cannot reach your files.
+  </p>
+  <p>
+    If you tap <strong>Export</strong>, iOS presents the standard share sheet and you choose where
+    the PDF goes &mdash; Messages, Mail, Files, another app, a printer. That only happens when you
+    ask for it, the file is the local devotional PDF, and whatever you pick is governed by that
+    destination's own privacy practices. No copy is sent to us.
+  </p>
+</section>
+
+<section aria-labelledby="children">
+  <h2 id="children"><span class="num">7</span>Children</h2>
+  <div class="rule"></div>
+  <p>
+    The app is devotional content suitable for all ages and is not directed at children in
+    particular. We knowingly collect no personal information from anyone, children included, because
+    we collect none at all. Note that videos play through YouTube's embedded player, so a parent who
+    wants to limit what Google receives should apply the relevant Google account and device
+    controls.
+  </p>
+</section>
+
+<section aria-labelledby="rights">
+  <h2 id="rights"><span class="num">8</span>Your data, and your choices</h2>
+  <div class="rule"></div>
+  <p>
+    Because we hold no personal data about you, there is nothing for us to export, correct, or
+    delete at your request &mdash; and no record we could use to recognise you if you asked. Your
+    practical controls are these:
+  </p>
+  <ul>
+    <li><strong>Remove everything the app stored:</strong> uninstall the app, or clear this site's data in your browser.</li>
+    <li><strong>Avoid YouTube and Google entirely:</strong> read the bhajans and books, which work fully offline, and do not open a video.</li>
+    <li><strong>Control what Google retains:</strong> use your <a href="https://myaccount.google.com/" rel="noreferrer">Google account controls</a> and your browser's or device's cookie settings.</li>
+    <li><strong>Turn off Android notifications:</strong> in Android settings, at any time.</li>
+  </ul>
+</section>
+
+<section aria-labelledby="changes">
+  <h2 id="changes"><span class="num">9</span>Changes to this policy</h2>
+  <div class="rule"></div>
+  <p>
+    If the app changes in a way that affects this policy, the policy is updated and the
+    &ldquo;Last updated&rdquo; date at the top changes with it. The same text is kept in the
+    project's public repository as <code>PRIVACY_POLICY.md</code>, so the two always agree.
+  </p>
+</section>
+
+<section aria-labelledby="contact">
+  <h2 id="contact"><span class="num">10</span>Contact</h2>
+  <div class="rule"></div>
+  <div class="contact">
+    <p>Questions about privacy, or about this policy:</p>
+    <p class="email"><a href="mailto:tanushreesharma1@gmail.com">tanushreesharma1@gmail.com</a></p>
+    <p style="margin-top:0.6rem;font-size:0.92rem">
+      This is a volunteer-run devotional project, so please allow some time for a reply.
+    </p>
+  </div>
+</section>
+
+<footer class="page">
+  <p>
+    <a href="/">&larr; Back to Bhaavamritdhaara</a>
+  </p>
+  <p>A non-commercial devotional project. It does not monetise, sell, or share user data.</p>
+</footer>
+
+</div>
+</body>
+</html>
