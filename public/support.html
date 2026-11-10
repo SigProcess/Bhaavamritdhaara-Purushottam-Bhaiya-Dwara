@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<meta name="theme-color" content="#2C1810" />
+<meta name="robots" content="index, follow" />
+<title>Support — Bhaavamrit | Bhaavamritdhaara, Purushottam Bhaiya Dwara</title>
+<meta name="description" content="Support for the Bhaavamrit iOS and Android apps: how to get help, what works offline, why videos need a connection, and how to reach us." />
+<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+<!--
+  Same approach as /privacy.html: no web fonts, no scripts, no third-party images, so reading
+  this page sends nothing anywhere. Typography falls back to fonts already on the device.
+-->
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --ivory:#F0E6D6;--parchment:#E8DCC8;--warm-white:#FBF7F0;
+    --saffron:#E07A1F;--saffron-deep:#C05E0A;
+    --crimson:#B03040;
+    --earth:#1A0A02;--earth-mid:#3A1E0A;
+    --gold:#C9933A;--gold-glow:rgba(201,147,58,0.18);
+    --text:#1E0E04;--text-secondary:#4A2E18;--text-muted:#6F5040;
+    --card-bg:#FFFCF7;--card-border:rgba(180,150,110,0.22);
+    --shadow-warm:rgba(120,70,30,0.08);--shadow-warm-lg:rgba(100,55,20,0.12);
+    --safe-left:env(safe-area-inset-left,0px);
+    --safe-right:env(safe-area-inset-right,0px);
+    --safe-bottom:env(safe-area-inset-bottom,0px);
+  }
+  html{min-width:320px;-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-behavior:smooth}
+  body{
+    min-height:100vh;
+    background:linear-gradient(170deg,#F2E8D8 0%,#EDE0CE 40%,#E8D6C0 100%);
+    color:var(--text);
+    font-family:'Lora',Georgia,'Times New Roman',serif;
+    font-size:18px;line-height:1.72;
+    -webkit-font-smoothing:antialiased;
+    padding:0 calc(1.25rem + var(--safe-left)) calc(3rem + var(--safe-bottom)) calc(1.25rem + var(--safe-right));
+  }
+  .wrap{max-width:46rem;margin:0 auto}
+  header.page{
+    padding:2.75rem 0 1.5rem;text-align:center;
+    border-bottom:1px solid var(--card-border);margin-bottom:2rem;
+  }
+  .om{
+    width:52px;height:52px;margin:0 auto 1.1rem;border-radius:50%;
+    background:linear-gradient(135deg,var(--saffron),var(--crimson));
+    color:#fff;font-size:1.5rem;line-height:52px;
+    box-shadow:0 3px 14px rgba(224,122,31,0.35),0 0 0 4px rgba(224,122,31,0.08);
+  }
+  h1{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(1.85rem,7vw,2.6rem);line-height:1.18;font-weight:700;
+    color:var(--earth);letter-spacing:-0.01em;
+  }
+  .eyebrow{
+    font-size:0.74rem;letter-spacing:0.16em;text-transform:uppercase;
+    color:var(--saffron-deep);font-weight:600;margin-bottom:0.7rem;
+  }
+  .app-name{font-size:1.02rem;color:var(--text-secondary);margin-top:0.6rem}
+  .app-name .hi{font-family:'Noto Serif Devanagari','Lora',serif}
+  h2{
+    font-family:'Playfair Display',Georgia,serif;
+    font-size:clamp(1.2rem,4.4vw,1.5rem);line-height:1.3;font-weight:700;
+    color:var(--earth);margin:0 0 0.75rem;
+  }
+  h3{
+    font-size:1.02rem;font-weight:700;color:var(--earth-mid);margin:1.1rem 0 0.35rem;
+  }
+  p{margin-bottom:0.95rem;color:var(--text-secondary)}
+  p:last-child{margin-bottom:0}
+  ul{margin:0 0 0.95rem 1.2rem;color:var(--text-secondary)}
+  li{margin-bottom:0.45rem}
+  li:last-child{margin-bottom:0}
+  a{color:var(--saffron-deep);text-decoration:underline;text-underline-offset:2px}
+  .card{
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-radius:12px;padding:1.3rem 1.4rem;margin-bottom:1.25rem;
+    box-shadow:0 2px 10px var(--shadow-warm);
+  }
+  .card:last-child{margin-bottom:0}
+  .contact{
+    background:var(--card-bg);border:1px solid var(--card-border);
+    border-left:4px solid var(--gold);border-radius:12px;
+    padding:1.15rem 1.25rem;margin-bottom:1.25rem;
+  }
+  .contact .email{font-size:1.06rem;font-weight:600;overflow-wrap:anywhere}
+  footer.page{
+    margin-top:2.5rem;padding-top:1.5rem;border-top:1px solid var(--card-border);
+    text-align:center;font-size:0.88rem;color:var(--text-muted);
+  }
+  footer.page p{color:var(--text-muted);margin-bottom:0.5rem}
+  @media (max-width:420px){
+    body{font-size:17px;padding-left:calc(1rem + var(--safe-left));padding-right:calc(1rem + var(--safe-right))}
+    .card,.contact{padding:1rem}
+    header.page{padding-top:2rem}
+  }
+  @media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="page">
+    <div class="om">ॐ</div>
+    <div class="eyebrow">Support</div>
+    <h1>Support</h1>
+    <p class="app-name">Bhaavamrit — Bhaavamritdhaara, <span class="hi">पुरुषोत्तम भाईया द्वारा</span></p>
+  </header>
+
+  <div class="contact">
+    <p>Questions, problems, or anything that isn't working:</p>
+    <p class="email"><a href="mailto:tanushreesharma1@gmail.com">tanushreesharma1@gmail.com</a></p>
+    <p>This is a volunteer-run devotional project, so please allow some time for a reply.</p>
+  </div>
+
+  <div class="card">
+    <h2>What the app offers</h2>
+    <p>Bhaavamrit gathers the bhajans, pravachans, lekh and vani vishleshan of Shri Purushottam Bhaiya in one place.</p>
+    <ul>
+      <li>8 collections spanning 56 playlists and more than 870 recordings</li>
+      <li>Bhajan Finder — search 135 bhajans by Hindi or English title</li>
+      <li>3 published books and 135 bhajan texts, included in the app</li>
+      <li>A built-in reader with zoom, and sharing through your device's share sheet</li>
+    </ul>
+    <p>There are no accounts, no advertising and no charges.</p>
+  </div>
+
+  <div class="card">
+    <h2>Common questions</h2>
+
+    <h3>Which parts work without internet?</h3>
+    <p>The books and all 135 bhajan texts are stored inside the app and open with no connection at all. Browsing the catalogue also works offline. Video and audio recordings are not stored in the app — they play through YouTube, so those need a connection.</p>
+
+    <h3>A video shows a play button but doesn't start on its own</h3>
+    <p>That is expected on iPhone and iPad. Apple only allows a video with sound to start after you tap the player directly, so the first tap on the play button is needed. We chose this over starting videos silently.</p>
+
+    <h3>A video won't play at all</h3>
+    <p>Check your connection first. Every video also has an <em>Open in YouTube</em> button, which plays the same recording in the YouTube app or your browser. If a recording fails there too, it has probably been changed or removed at the source — please tell us which one and we will look into it.</p>
+
+    <h3>Can I keep or share a bhajan text or book?</h3>
+    <p>Yes. Open it and use the share or export button to save it, print it, or send it on. The file never leaves your device unless you choose to share it.</p>
+
+    <h3>Is my information collected?</h3>
+    <p>No. The app has no analytics, telemetry or crash reporting, and we operate no server that receives information about you. Videos play in YouTube's own player, so Google receives those requests under its own privacy policy. This is set out in full in our <a href="/privacy.html">privacy policy</a>.</p>
+
+    <h3>The app looks out of date</h3>
+    <p>Content is loaded from our website, so new recordings appear without an app update. If something looks stale, close the app fully and reopen it. On Android you can also clear the app's storage from Settings to force a fresh fetch.</p>
+  </div>
+
+  <div class="card">
+    <h2>Reporting a problem</h2>
+    <p>So we can help quickly, please include:</p>
+    <ul>
+      <li>your device and its operating system version, for example iPhone 15, iOS 26</li>
+      <li>whether you installed from the App Store, Google Play or TestFlight</li>
+      <li>what you tapped, and what happened instead of what you expected</li>
+      <li>the name of the bhajan, pravachan or book involved, if it concerns one item</li>
+      <li>a screenshot, if you can take one</li>
+    </ul>
+  </div>
+
+  <footer class="page">
+    <p><a href="/">Bhaavamritdhaara</a> &middot; <a href="/privacy.html">Privacy policy</a></p>
+    <p>Bhajans, pravachans and published books by Shri Purushottam Bhaiya.</p>
+  </footer>
+
+</div>
+</body>
+</html>
