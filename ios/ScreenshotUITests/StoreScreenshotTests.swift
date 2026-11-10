@@ -277,12 +277,10 @@ final class StoreScreenshotTests: XCTestCase {
         play.tap()
 
         // Status text goes "Starting {title}…" and then either "Playing {title}." once the
-        // embed starts, or "Tap play in the player to start {title}." where the embed cannot
-        // report its own state — which is the case in this app, because the web view is served
-        // from `capacitor://localhost` and the embed has to declare an origin instead, leaving
-        // YouTube no channel back to the page. Both are usable captures: the player stays on
-        // screen with YouTube's own play button either way. Record whichever we land on; do not
-        // pretend it played.
+        // embed starts, or "Tap play in the player to start {title}." where the embed was
+        // created paused because this platform refuses to start audible media on its own. Both
+        // are usable captures: the player stays on screen with YouTube's own play button either
+        // way. Record whichever we land on; do not pretend it played.
         let ready = app.staticTexts.containing(
             NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Playing ", "Tap play ")
         ).firstMatch
@@ -293,7 +291,7 @@ final class StoreScreenshotTests: XCTestCase {
         }
         sleep(4.0) // let the YouTube iframe paint its poster frame
 
-        provePlayback(belowPlayButton: play)
+        provePlayback(above: play)
         capture("05-video-player")
     }
 
@@ -302,15 +300,14 @@ final class StoreScreenshotTests: XCTestCase {
     /// Taps YouTube's own play button and then measures whether the player surface is actually
     /// moving.
     ///
-    /// The status text cannot answer this question. On this origin the embed declares an origin
-    /// that is not the page's, so YouTube's postMessage replies never reach the page and the app
-    /// stays on "Tap play in the player to start …" even when the video is playing perfectly.
-    /// The iframe's internals are not in the accessibility tree either, so there is no element
-    /// to query. What is left is the pixels: a poster frame with a play button is static, and a
-    /// playing video is not. Sample the surface twice, several seconds apart and after YouTube's
-    /// controls have auto-hidden, and report how much of it changed.
-    private func provePlayback(belowPlayButton play: XCUIElement) {
-        guard let surface = playerSurfaceRect(below: play) else {
+    /// The status text cannot answer this question. "Tap play in the player to start …" is what
+    /// this screen says whenever the embed was created paused, whether the embed then plays or
+    /// not, and the iframe's internals are not in the accessibility tree, so there is no element
+    /// to query. What is left is the pixels: a poster frame, an error card and a stalled player
+    /// are all static, and a playing video is not. Sample the surface twice, several seconds
+    /// apart and after YouTube's controls have auto-hidden, and report how much of it changed.
+    private func provePlayback(above play: XCUIElement) {
+        guard let surface = playerSurfaceRect(above: play) else {
             note("player-surface=unknown; skipping the in-player tap and the motion check")
             return
         }
@@ -347,24 +344,27 @@ final class StoreScreenshotTests: XCTestCase {
         }
     }
 
-    /// The player surface fills the gap between the playlist heading and the controls row, so
-    /// its rectangle can be derived from two things that *are* in the accessibility tree rather
-    /// than guessed from a fixed aspect ratio against an unknown page padding. The heading is
-    /// found by geometry, not by label, because the label is a catalogue title in Devanagari
-    /// that this test has no business hard-coding.
-    private func playerSurfaceRect(below play: XCUIElement) -> CGRect? {
+    /// The player surface sits directly above the controls row, is exactly as wide as it, and is
+    /// held to 16:9 by the stylesheet. Every control button spans the full container width in
+    /// this layout, so the button's own frame supplies the container's content width — the one
+    /// measurement the accessibility tree can give for a region it does not otherwise expose.
+    ///
+    /// Derived this way rather than from the heading: run 42794465107 looked for the last text
+    /// above the controls and landed on a rectangle 321x60 points, a sliver well below the real
+    /// 355x200 player, which made the tap and the motion reading meaningless.
+    private func playerSurfaceRect(above play: XCUIElement) -> CGRect? {
         let window = app.windows.firstMatch.frame
         guard play.exists, window.width > 0 else { return nil }
-        let bottom = play.frame.minY
-        let headingBottoms = app.staticTexts.allElementsBoundByIndex
-            .prefix(40)
-            .map { $0.frame }
-            .filter { $0.maxY < bottom - 40 && $0.height > 0 }
-            .map { $0.maxY }
-        let top = headingBottoms.max() ?? (window.minY + window.height * 0.12)
-        guard bottom - top > 60 else { return nil }
-        let rect = CGRect(x: window.minX, y: top, width: window.width, height: bottom - top)
-            .insetBy(dx: window.width * 0.1, dy: 8)
+        let controls = play.frame
+        guard controls.width > 40, controls.minX.isFinite, controls.minY.isFinite else { return nil }
+        let gap: CGFloat = 16 // .video-player { gap: 1rem }
+        let height = controls.width * 9 / 16
+        let rect = CGRect(
+            x: controls.minX,
+            y: controls.minY - gap - height,
+            width: controls.width,
+            height: height
+        )
         // WebKit reports page coordinates, so a scrolled page would hand back a rectangle that
         // is not on screen at all. Refuse it rather than tap into nothing and call the silence
         // a result.
@@ -372,7 +372,8 @@ final class StoreScreenshotTests: XCTestCase {
             note("player-surface rejected: \(describe(rect)) is outside the window \(describe(window))")
             return nil
         }
-        return rect
+        // Keep clear of the rounded corners and the page behind them.
+        return rect.insetBy(dx: rect.width * 0.12, dy: rect.height * 0.12)
     }
 
     /// Downsamples the surface to a small grid. Averaging away the detail is what makes the
