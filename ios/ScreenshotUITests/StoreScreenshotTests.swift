@@ -276,13 +276,18 @@ final class StoreScreenshotTests: XCTestCase {
         }
         play.tap()
 
-        // Status text goes "Starting {title}…" then "Playing {title}." on success, or one of the
-        // documented failure strings. Record whichever we land on; do not pretend it played.
-        let playing = app.staticTexts.containing(NSPredicate(format: "label BEGINSWITH %@", "Playing ")).firstMatch
-        let started = playing.waitForExistence(timeout: longTimeout)
+        // Status text goes "Starting {title}…" and then either "Playing {title}." once the
+        // embed starts, or "Tap play in the player to start {title}." where WebKit refuses to
+        // start audible media without a gesture on the media itself. Both are usable captures:
+        // the player stays on screen with YouTube's own play button either way. Record
+        // whichever we land on; do not pretend it played.
+        let ready = app.staticTexts.containing(
+            NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Playing ", "Tap play ")
+        ).firstMatch
+        let started = ready.waitForExistence(timeout: longTimeout)
         note("playback-status-reached=\(started) status=\(statusLabel())")
         if !started {
-            note("WARNING 05: embedded player never reported playback; capturing actual state")
+            note("WARNING 05: embedded player reported neither playback nor a play prompt; capturing actual state")
         }
         sleep(4.0) // let the YouTube iframe paint its first frames
         capture("05-video-player")
@@ -468,8 +473,8 @@ final class StoreScreenshotTests: XCTestCase {
     }
 
     private func statusLabel() -> String {
-        let predicate = NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@ OR label CONTAINS %@",
-                                    "Playing ", "Starting ", "did not begin")
+        let predicate = NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@ OR label BEGINSWITH %@ OR label CONTAINS %@",
+                                    "Playing ", "Starting ", "Tap play ", "did not begin")
         let match = app.staticTexts.matching(predicate).firstMatch
         return match.exists ? match.label : "none"
     }

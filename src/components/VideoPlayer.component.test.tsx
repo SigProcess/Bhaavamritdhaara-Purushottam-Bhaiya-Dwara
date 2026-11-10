@@ -81,7 +81,13 @@ describe('VideoPlayer', () => {
     expect(status).toHaveTextContent('Playing English Discourse.')
   })
 
-  it('enforces the playing-state deadline', async () => {
+  /**
+   * The deadline exists to catch a player that never arrives, not to punish a
+   * player that is simply waiting for a tap. A ready player therefore stays on
+   * screen, because YouTube's own play button inside the iframe is the only
+   * thing WebKit will accept for audible media.
+   */
+  it('keeps a timed-out but ready player on screen and asks for a tap', async () => {
     vi.useFakeTimers()
     const media = new FakeExternalMediaService()
     render(
@@ -97,12 +103,18 @@ describe('VideoPlayer', () => {
     await vi.advanceTimersByTimeAsync(30_000)
 
     expect(screen.getByRole('status')).toHaveTextContent(
-      'हिन्दी प्रवचन did not begin playing in time.',
+      'Tap play in the player to start हिन्दी प्रवचन.',
     )
+    expect(media.handles[0].disposeCalls).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^Retry/ })).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Open हिन्दी प्रवचन in YouTube' }),
+    ).toBeInTheDocument()
+
+    // The tap inside the iframe finally starts playback, long after the deadline.
     media.handles[0].emit('playing')
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'हिन्दी प्रवचन did not begin playing in time.',
-    )
+    await vi.advanceTimersByTimeAsync(0)
+    expect(screen.getByRole('status')).toHaveTextContent('Playing हिन्दी प्रवचन.')
   })
 
   it('presents playlist fallback without starting playback', async () => {
@@ -153,10 +165,11 @@ describe('VideoPlayer', () => {
 
 
 describe('VideoPlayer failure recovery', () => {
-  it('disposes a timed-out player and retries only the same playback request', async () => {
+  it('disposes a player that never became ready and retries only that request', async () => {
     vi.useFakeTimers()
     const media = new FakeExternalMediaService()
     const network = new FakeNetworkService('online')
+    media.stallNextRequest()
     render(
       <VideoPlayer
         catalog={canonicalCatalogFixture}
@@ -171,7 +184,7 @@ describe('VideoPlayer failure recovery', () => {
     await vi.advanceTimersByTimeAsync(30_000)
 
     const requestId = media.prepareCalls[0].requestId
-    expect(media.handles[0].disposeCalls).toHaveLength(1)
+    expect(media.handles).toHaveLength(0)
     expect(screen.getByRole('status')).toHaveTextContent(
       'हिन्दी प्रवचन did not begin playing in time.',
     )
@@ -190,7 +203,51 @@ describe('VideoPlayer failure recovery', () => {
 
     expect(media.retryCalls).toEqual([requestId])
     expect(media.prepareCalls).toHaveLength(1)
-    expect(media.handles[1].playCalls).toHaveLength(1)
+    expect(media.handles[0].playCalls).toHaveLength(1)
+  })
+
+  /**
+   * iOS: the embed is created paused, so nothing is pending and nothing has
+   * failed. The player stays mounted with YouTube's play button, the external
+   * fallback stays available, and no deadline tears any of it down.
+   */
+  it('waits for a tap, without a deadline, when the platform refuses autoplay', async () => {
+    vi.useFakeTimers()
+    const media = new FakeExternalMediaService(false)
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+        networkService={new FakeNetworkService('online')}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
+    await vi.advanceTimersByTimeAsync(0)
+
+    expect(media.handles[0].playCalls).toHaveLength(0)
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Tap play in the player to start English Discourse.',
+    )
+    expect(
+      screen.getByRole('button', { name: 'Open English Discourse in YouTube' }),
+    ).toBeInTheDocument()
+
+    await vi.advanceTimersByTimeAsync(60_000)
+    expect(media.handles[0].disposeCalls).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^Retry/ })).not.toBeInTheDocument()
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Tap play in the player to start English Discourse.',
+    )
+
+    media.handles[0].emit('playing')
+    await vi.advanceTimersByTimeAsync(0)
+    expect(screen.getByRole('status')).toHaveTextContent('Playing English Discourse.')
+    expect(
+      screen.queryByRole('button', { name: /in YouTube$/ }),
+    ).not.toBeInTheDocument()
   })
 
   it('keeps metadata usable offline and enables the same retry after reconnection', async () => {

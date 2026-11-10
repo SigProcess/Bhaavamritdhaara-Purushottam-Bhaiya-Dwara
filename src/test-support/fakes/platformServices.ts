@@ -163,6 +163,7 @@ export class FakePlayerHandle implements PlayerHandle {
     readonly requestId: PlaybackRequestId,
     readonly playlistId: PlaybackRequest['playlistId'],
     readonly selectedVideoId?: PlaybackRequest['videoId'],
+    readonly startsAutomatically: boolean = true,
     private positionSeconds = 0,
     private fullscreenAvailable = true,
   ) {}
@@ -216,6 +217,9 @@ export class FakeExternalMediaService implements ExternalMediaService {
   private readonly requests = new Map<PlaybackRequestId, PlaybackRequest>()
   private readonly nextFailures = new Map<PlaybackRequestId, string>()
   private nextFailure: string | undefined
+  private stalled = false
+
+  constructor(private readonly startsAutomatically = true) {}
 
   failNextRequest(errorCode: string): void {
     this.nextFailure = errorCode
@@ -223,6 +227,11 @@ export class FakeExternalMediaService implements ExternalMediaService {
 
   failNext(requestId: PlaybackRequestId, errorCode: string): void {
     this.nextFailures.set(requestId, errorCode)
+  }
+
+  /** Reproduces a player that never reports readiness, so no handle appears. */
+  stallNextRequest(): void {
+    this.stalled = true
   }
 
   async prepare(request: PlaybackRequest, target: HTMLElement): Promise<PlayerHandle> {
@@ -250,10 +259,15 @@ export class FakeExternalMediaService implements ExternalMediaService {
       this.nextFailure = undefined
       throw new FakeServiceError(errorCode)
     }
+    if (this.stalled) {
+      this.stalled = false
+      return new Promise<PlayerHandle>(() => {})
+    }
     const handle = new FakePlayerHandle(
       request.requestId,
       request.playlistId,
       request.videoId,
+      this.startsAutomatically,
     )
     this.handles.push(handle)
     return handle

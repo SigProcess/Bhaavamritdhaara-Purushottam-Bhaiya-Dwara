@@ -137,18 +137,36 @@ const validateReleaseVersion = (value: string): string => {
   return version
 }
 
+/**
+ * Names the browser runtime the app has to branch on. Android is checked first
+ * because only Android resolves YouTube intent URIs. The Apple handhelds are
+ * reported as `'ios'` because WebKit refuses to start audible media without a
+ * gesture on the media itself, which rules out autoplay there.
+ *
+ * Every Apple handheld runtime carries one of these tokens, including the
+ * Capacitor WKWebView (which keeps WebKit's default agent, since the app sets
+ * neither `appendUserAgent` nor `overrideUserAgent`) and Chrome or Firefox for
+ * iOS (which are WebKit underneath and keep `iPhone`/`iPad` in their agents).
+ *
+ * Known limitation: iPadOS Safari requests desktop sites by default and sends a
+ * macOS agent, so an iPad in that mode is reported as `'web'`. Desktop Safari
+ * gates audible autoplay too, so both fall back to the same correction: a
+ * player that stays on screen with its own play button.
+ */
 export const detectBrowserPlatform = (
   userAgent = typeof navigator === 'undefined' ? '' : navigator.userAgent,
-): Extract<AppPlatform, 'web' | 'android'> =>
-  /\bAndroid\b/i.test(userAgent) ? 'android' : 'web'
+): AppPlatform => {
+  if (/\bAndroid\b/i.test(userAgent)) return 'android'
+  if (/\b(?:iPhone|iPad|iPod)\b/i.test(userAgent)) return 'ios'
+  return 'web'
+}
 
 export class BrowserAppMetadataService implements AppMetadataService {
   private readonly version: string
 
   constructor(
     metadata: GeneratedBuildMetadata,
-    private readonly platform: Extract<AppPlatform, 'web' | 'android'> =
-      detectBrowserPlatform(),
+    private readonly platform: AppPlatform = detectBrowserPlatform(),
   ) {
     this.version = validateReleaseVersion(metadata.releaseVersion)
   }

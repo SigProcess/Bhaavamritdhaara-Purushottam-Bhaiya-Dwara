@@ -77,6 +77,13 @@ export interface PlayerHandle {
   readonly requestId: PlaybackRequestId
   readonly playlistId: PlaylistId
   readonly selectedVideoId?: VideoId
+  /**
+   * False when the prepared player cannot start on its own and playback waits
+   * for the user to press play inside it. WebKit refuses to start audible media
+   * without a gesture on the media itself, and these are devotional recordings,
+   * so muting to win autoplay is not an option.
+   */
+  readonly startsAutomatically: boolean
   play(): void
   getCurrentTime(): number
   seekTo(positionSeconds: number): void

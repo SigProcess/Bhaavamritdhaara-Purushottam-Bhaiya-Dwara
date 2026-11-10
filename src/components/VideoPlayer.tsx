@@ -98,6 +98,7 @@ export default function VideoPlayer({
   )
   const registryRef = useRef(registryState)
   const [fullscreenAvailable, setFullscreenAvailable] = useState(false)
+  const [awaitingPlayTap, setAwaitingPlayTap] = useState(false)
   const mountRef = useRef<HTMLDivElement>(null)
   const surfaceRef = useRef<HTMLDivElement>(null)
   const handleRef = useRef<PlayerHandle | undefined>(undefined)
@@ -127,6 +128,7 @@ export default function VideoPlayer({
     handleRef.current?.dispose()
     handleRef.current = undefined
     setFullscreenAvailable(false)
+    setAwaitingPlayTap(false)
   }, [clearDeadline])
 
   useEffect(() => {
@@ -182,6 +184,22 @@ export default function VideoPlayer({
     })
   }, [applyRegistryAction])
 
+  /**
+   * A mounted player that has not started is not a failure: it is a player
+   * waiting for a tap on its own play button, which is the only thing WebKit
+   * accepts for audible media. Keep the iframe on screen and say so, instead of
+   * destroying the one control that can still start playback.
+   */
+  const awaitPlayTap = useCallback((request: PlaybackRequest) => {
+    setAwaitingPlayTap(true)
+    dispatch({
+      type: 'set-playback-state',
+      playlistId: request.playlistId,
+      ...(request.videoId === undefined ? {} : { videoId: request.videoId }),
+      playbackState: 'paused',
+    })
+  }, [])
+
   const attachHandle = useCallback((handle: PlayerHandle, operation: number) => {
     if (operation !== operationRef.current) {
       handle.dispose()
@@ -201,6 +219,7 @@ export default function VideoPlayer({
       }
       if (mediaState === 'playing') {
         clearDeadline()
+        setAwaitingPlayTap(false)
         applyRegistryAction({ type: 'request-succeeded', requestId: handle.requestId })
       }
       if (mediaState === 'paused' || mediaState === 'ended') savePosition(handle)
@@ -221,10 +240,17 @@ export default function VideoPlayer({
     const operation = operationRef.current
     deadlineRef.current = setTimeout(() => {
       if (operation !== operationRef.current) return
+      // A player that reached `onReady` is still usable, so the deadline
+      // degrades to "press play" and leaves the iframe mounted. Only a request
+      // that never produced a player at all is a failure.
+      if (handleRef.current) {
+        awaitPlayTap(request)
+        return
+      }
       disposeMedia()
       failRequest(request, PLAYBACK_TIMEOUT)
     }, PLAYING_DEADLINE_MS)
-  }, [clearDeadline, disposeMedia, failRequest])
+  }, [awaitPlayTap, clearDeadline, disposeMedia, failRequest])
 
   const executeRequest = useCallback(async (
     request: PlaybackRequest,
@@ -273,8 +299,17 @@ export default function VideoPlayer({
         handle = await service.prepare(request, target)
       }
       if (attachHandle(handle, operation)) {
-        if (request.videoId !== undefined) handle.play()
-        else applyRegistryAction({ type: 'request-succeeded', requestId: request.requestId })
+        if (request.videoId === undefined) {
+          applyRegistryAction({ type: 'request-succeeded', requestId: request.requestId })
+        } else if (handle.startsAutomatically) {
+          handle.play()
+        } else {
+          // The embed was created paused because this platform refuses to start
+          // audible media on its own. Nothing is pending, so retire the
+          // deadline and point at the play button instead of counting down.
+          clearDeadline()
+          awaitPlayTap(request)
+        }
       }
     } catch {
       if (operation === operationRef.current) {
@@ -282,7 +317,7 @@ export default function VideoPlayer({
         failRequest(request, PLAYBACK_SERVICE_ERROR)
       }
     }
-  }, [applyRegistryAction, attachHandle, clearDeadline, disposeMedia, failRequest, network, service, startDeadline])
+  }, [applyRegistryAction, attachHandle, awaitPlayTap, clearDeadline, disposeMedia, failRequest, network, service, startDeadline])
 
   const beginPlayback = useCallback((videoId?: VideoId) => {
     const request: PlaybackRequest = {
@@ -411,7 +446,8 @@ export default function VideoPlayer({
                 Retry {contentTitle}
               </button>
             )}
-            {activeRequest !== undefined && (retryVisible || state.playbackState === 'loading') && (
+            {activeRequest !== undefined
+              && (retryVisible || awaitingPlayTap || state.playbackState === 'loading') && (
               <button type="button" onClick={openExternally}>
                 Open {contentTitle} in YouTube
               </button>
@@ -421,6 +457,7 @@ export default function VideoPlayer({
           <p className="video-player-status" role="status" aria-live="polite" aria-atomic="true">
             {state.playbackState === 'loading' && `Starting ${contentTitle}…`}
             {state.playbackState === 'playing' && `Playing ${contentTitle}.`}
+            {awaitingPlayTap && state.playbackState === 'paused' && `Tap play in the player to start ${contentTitle}.`}
             {state.playbackState === 'failed' && errorCode === PLAYBACK_TIMEOUT && `${contentTitle} did not begin playing in time.`}
             {state.playbackState === 'failed' && errorCode === PLAYBACK_OFFLINE && `${contentTitle} requires a network connection.`}
             {state.playbackState === 'failed' && errorCode === PLAYBACK_SERVICE_ERROR && `${contentTitle} is unavailable in the embedded player.`}

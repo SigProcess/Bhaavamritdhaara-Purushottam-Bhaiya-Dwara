@@ -60,7 +60,58 @@ describe('browser lifecycle and metadata', () => {
     )
     await expect(metadata.getVersion()).resolves.toBe('1.2.3-web')
     expect(metadata.getPlatform()).toBe('android')
-    expect(detectBrowserPlatform('Mozilla/5.0 (Linux; Android 14)')).toBe('android')
+  })
+})
+
+describe('detectBrowserPlatform', () => {
+  // Agents copied from the runtimes this app actually ships to. The iOS group
+  // decides whether the YouTube embed may be created with autoplay, so it is
+  // pinned here rather than inferred.
+  it('separates Android, Apple handhelds, and everything else', () => {
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+      ),
+    ).toBe('android')
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/131.0.0.0 Mobile Safari/537.36; wv',
+      ),
+    ).toBe('android')
+
+    // iPhone Safari, the runtime where the embedded player was reported broken.
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1',
+      ),
+    ).toBe('ios')
+    // The Capacitor WKWebView: WebKit's default agent minus Safari's own
+    // tokens, since the app configures no appendUserAgent/overrideUserAgent.
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148',
+      ),
+    ).toBe('ios')
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) CriOS/128.0 Mobile/15E148 Safari/604.1',
+      ),
+    ).toBe('ios')
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (iPad; CPU OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1',
+      ),
+    ).toBe('ios')
+
+    expect(
+      detectBrowserPlatform(
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      ),
+    ).toBe('web')
+    expect(
+      detectBrowserPlatform('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Firefox/133.0'),
+    ).toBe('web')
+    expect(detectBrowserPlatform('')).toBe('web')
   })
 })
 

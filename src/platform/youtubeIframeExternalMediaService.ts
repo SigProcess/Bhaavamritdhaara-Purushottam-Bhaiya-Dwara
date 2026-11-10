@@ -122,6 +122,24 @@ function openExternalUrl(target: string): void {
   window.open(target, '_blank', 'noopener,noreferrer')
 }
 
+/**
+ * Autoplay is a per-platform decision, not a preference.
+ *
+ * Android Chrome rejects a cross-origin `playVideo()` from the parent frame
+ * because that frame's activation does not reach the iframe, so the start has
+ * to live inside the iframe's own load (`autoplay: 1`). WebKit refuses the
+ * opposite way round: audible media may only start from a gesture on the media
+ * itself, so `autoplay: 1` cannot succeed on iOS at all and only makes the
+ * player look broken while it waits. There, the embed is created paused and
+ * YouTube's own play button inside the iframe does the starting.
+ *
+ * Muting is never an option: these are devotional recordings, so an extra tap
+ * beats silent playback.
+ */
+function autoplayStartsPlayback(): boolean {
+  return detectBrowserPlatform() !== 'ios'
+}
+
 function findPlaylist(catalog: Catalog, request: PlaybackRequest): PlaylistRecord {
   const playlist = [...catalog.collectionPlaylists, ...catalog.standalonePlaylists]
     .find(({ id }) => id === request.playlistId)
@@ -138,6 +156,7 @@ class YouTubePlayerHandle implements PlayerHandle {
     readonly requestId: PlaybackRequestId,
     readonly playlistId: PlaybackRequest['playlistId'],
     selectedVideoId: PlaybackRequest['videoId'],
+    readonly startsAutomatically: boolean,
     private readonly player: YouTubePlayerInstance,
   ) {
     this.selectedVideoId = selectedVideoId
@@ -199,9 +218,13 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
 
   /**
    * An explicit video request starts inside the iframe's own load
-   * (`autoplay: 1`), because a cross-origin `playVideo()` from the parent frame
-   * has no user activation of its own and Chrome for Android rejects it. The
-   * playlist fallback keeps `autoplay: 0` so merely opening a playlist is silent.
+   * (`autoplay: 1`) wherever that is allowed, because a cross-origin
+   * `playVideo()` from the parent frame has no user activation of its own and
+   * Chrome for Android rejects it. On iOS the same parameter is `0`, since
+   * WebKit cannot honour it, and the resulting handle reports
+   * `startsAutomatically: false` so the caller waits for the user instead of
+   * treating a quiet player as a failure. The playlist fallback keeps
+   * `autoplay: 0` so merely opening a playlist is silent.
    */
   async prepare(request: PlaybackRequest, target: HTMLElement): Promise<PlayerHandle> {
     const playlist = findPlaylist(this.catalog, request)
@@ -220,6 +243,7 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
     target.replaceChildren()
     const playerTarget = document.createElement('div')
     target.append(playerTarget)
+    const autostarts = video !== undefined && autoplayStartsPlayback()
 
     return new Promise<PlayerHandle>((resolve, reject) => {
       let handle: YouTubePlayerHandle | undefined
@@ -228,7 +252,7 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
       const player = new api.Player(playerTarget, {
         ...(video ? { videoId: video.sourceVideoId } : {}),
         playerVars: video
-          ? { autoplay: 1, rel: 0, playsinline: 1 }
+          ? { autoplay: autostarts ? 1 : 0, rel: 0, playsinline: 1 }
           : {
               autoplay: 0,
               rel: 0,
@@ -242,6 +266,7 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
               request.requestId,
               request.playlistId,
               request.videoId,
+              autostarts,
               player,
             )
             ready = true

@@ -77,6 +77,7 @@ describe('YouTubeIframeExternalMediaService', () => {
     expect(installs[0].options.playerVars.autoplay).toBe(1)
     expect(installs[0].options.playerVars).not.toHaveProperty('mute')
     expect(installs[0].options.playerVars).not.toHaveProperty('muted')
+    expect(handle.startsAutomatically).toBe(true)
     handle.play()
     expect((handle as unknown as { player: FakeYouTubePlayer }).player.playVideo).toHaveBeenCalledOnce()
 
@@ -84,6 +85,63 @@ describe('YouTubeIframeExternalMediaService', () => {
     handle.subscribeState(listener)
     installs[0].options.events.onStateChange({ data: 1 })
     expect(listener).toHaveBeenCalledWith('playing')
+  })
+
+  it('keeps the Android embed autoplaying, unmuted, and inline', async () => {
+    installApi()
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+    )
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const playlist = canonicalCatalogFixture.collectionPlaylists[0]
+    const video = playlist.videos![0]
+    const handle = await service.prepare({
+      requestId: 'playback-android' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, document.createElement('div'))
+
+    expect(installs[0].options.playerVars).toMatchObject({
+      autoplay: 1,
+      playsinline: 1,
+      rel: 0,
+    })
+    expect(installs[0].options.playerVars).not.toHaveProperty('mute')
+    expect(installs[0].options.playerVars).not.toHaveProperty('muted')
+    expect(handle.startsAutomatically).toBe(true)
+    vi.restoreAllMocks()
+  })
+
+  /**
+   * WebKit only starts audible media from a gesture on the media itself, so an
+   * autoplaying embed can never start on iOS and just leaves the player
+   * looking stuck. The embed is created paused instead, and stays unmuted:
+   * muting these recordings would be worse than asking for one tap.
+   */
+  it('creates a paused, unmuted embed on iOS and reports that it will not self-start', async () => {
+    installApi()
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 18_1 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.1 Mobile/15E148 Safari/604.1',
+    )
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const playlist = canonicalCatalogFixture.collectionPlaylists[0]
+    const video = playlist.videos![0]
+    const handle = await service.prepare({
+      requestId: 'playback-ios' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, document.createElement('div'))
+
+    expect(installs[0].options.videoId).toBe(video.sourceVideoId)
+    expect(installs[0].options.playerVars).toMatchObject({
+      autoplay: 0,
+      playsinline: 1,
+      rel: 0,
+    })
+    expect(installs[0].options.playerVars).not.toHaveProperty('mute')
+    expect(installs[0].options.playerVars).not.toHaveProperty('muted')
+    expect(handle.startsAutomatically).toBe(false)
+    vi.restoreAllMocks()
   })
 
   it('replays a state observed before the subscriber attaches', async () => {
