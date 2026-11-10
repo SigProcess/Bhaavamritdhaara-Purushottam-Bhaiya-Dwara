@@ -1,6 +1,7 @@
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useReducer,
   useRef,
@@ -357,6 +358,13 @@ export default function VideoPlayer({
     // off-screen. `behavior` is omitted so the scrolling box's CSS decides:
     // smooth normally, instant under `prefers-reduced-motion: reduce`. The
     // optional call covers jsdom and older WebViews without `scrollIntoView`.
+    //
+    // This call alone is not enough on iOS: WebKit abandons an in-flight smooth
+    // scroll while a touch gesture or its momentum is still settling, and
+    // mounting the player changes document height mid-animation. The layout
+    // effect below re-asserts the position after React commits, which is past
+    // both hazards. Keep this one so pointer platforms still start moving on
+    // the tap itself.
     surfaceRef.current?.scrollIntoView?.({ block: 'start' })
     if (videoId !== state.selectedVideoId) {
       dispatch({ type: 'select-video', playlistId: playlist.id, videoId })
@@ -367,6 +375,27 @@ export default function VideoPlayer({
       beginPlayback(videoId)
     }
   }, [beginPlayback, playlist.id, state])
+
+  // Re-assert the player position after React has committed. The scroll inside
+  // `selectVideo` happens while the tap is still settling, which is exactly the
+  // window WebKit uses to discard programmatic smooth scrolls, and the player
+  // mounting right afterwards shifts layout again. Running here clears both
+  // hazards. Keyed on the selection, so it never fights a scroll the reader
+  // performed themselves.
+  const selectedVideoId = state.mode === 'recorded-videos' ? state.selectedVideoId : undefined
+  const lastScrolledVideoRef = useRef<VideoId | undefined>(undefined)
+  useLayoutEffect(() => {
+    if (selectedVideoId === undefined) return
+    if (lastScrolledVideoRef.current === undefined) {
+      // First commit for this playlist. AppShell has already placed the route
+      // at the top, so claiming the scroll here would undo that.
+      lastScrolledVideoRef.current = selectedVideoId
+      return
+    }
+    if (lastScrolledVideoRef.current === selectedVideoId) return
+    lastScrolledVideoRef.current = selectedVideoId
+    surfaceRef.current?.scrollIntoView?.({ block: 'start' })
+  }, [selectedVideoId])
 
   const enterFullscreen = useCallback(async () => {
     const handle = handleRef.current

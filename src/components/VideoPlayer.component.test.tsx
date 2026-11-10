@@ -361,9 +361,14 @@ describe('VideoPlayer selection brings the player into view', () => {
 
     fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
 
-    expect(calls).toHaveLength(1)
+    // Two calls by design: one during the tap, and one re-asserted after the
+    // commit because WebKit discards a programmatic smooth scroll while touch
+    // momentum is settling and the mounting player shifts layout again.
+    expect(calls).toHaveLength(2)
     expect(calls[0].element).toHaveClass('video-player-surface')
+    expect(calls[1].element).toHaveClass('video-player-surface')
     expect(calls[0].options).toEqual({ block: 'start' })
+    expect(calls[1].options).toEqual({ block: 'start' })
     expect(Object.keys(calls[0].options as object)).toEqual(['block'])
     await waitFor(() => expect(media.prepareCalls).toHaveLength(1))
   })
@@ -405,7 +410,7 @@ describe('VideoPlayer selection brings the player into view', () => {
 
     fireEvent.click(screen.getByRole('option', { name: /English Discourse/ }))
 
-    expect(calls).toHaveLength(1)
+    expect(calls).toHaveLength(2)
     expect(await screen.findByRole('status')).toHaveTextContent(
       'English Discourse is unavailable in the embedded player.',
     )
