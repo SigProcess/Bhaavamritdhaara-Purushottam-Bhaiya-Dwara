@@ -277,10 +277,12 @@ final class StoreScreenshotTests: XCTestCase {
         play.tap()
 
         // Status text goes "Starting {title}…" and then either "Playing {title}." once the
-        // embed starts, or "Tap play in the player to start {title}." where WebKit refuses to
-        // start audible media without a gesture on the media itself. Both are usable captures:
-        // the player stays on screen with YouTube's own play button either way. Record
-        // whichever we land on; do not pretend it played.
+        // embed starts, or "Tap play in the player to start {title}." where the embed cannot
+        // report its own state — which is the case in this app, because the web view is served
+        // from `capacitor://localhost` and the embed has to declare an origin instead, leaving
+        // YouTube no channel back to the page. Both are usable captures: the player stays on
+        // screen with YouTube's own play button either way. Record whichever we land on; do not
+        // pretend it played.
         let ready = app.staticTexts.containing(
             NSPredicate(format: "label BEGINSWITH %@ OR label BEGINSWITH %@", "Playing ", "Tap play ")
         ).firstMatch
@@ -289,8 +291,158 @@ final class StoreScreenshotTests: XCTestCase {
         if !started {
             note("WARNING 05: embedded player reported neither playback nor a play prompt; capturing actual state")
         }
-        sleep(4.0) // let the YouTube iframe paint its first frames
+        sleep(4.0) // let the YouTube iframe paint its poster frame
+
+        provePlayback(belowPlayButton: play)
         capture("05-video-player")
+    }
+
+    // MARK: - Proving playback, not just a mounted player
+
+    /// Taps YouTube's own play button and then measures whether the player surface is actually
+    /// moving.
+    ///
+    /// The status text cannot answer this question. On this origin the embed declares an origin
+    /// that is not the page's, so YouTube's postMessage replies never reach the page and the app
+    /// stays on "Tap play in the player to start …" even when the video is playing perfectly.
+    /// The iframe's internals are not in the accessibility tree either, so there is no element
+    /// to query. What is left is the pixels: a poster frame with a play button is static, and a
+    /// playing video is not. Sample the surface twice, several seconds apart and after YouTube's
+    /// controls have auto-hidden, and report how much of it changed.
+    private func provePlayback(belowPlayButton play: XCUIElement) {
+        guard let surface = playerSurfaceRect(below: play) else {
+            note("player-surface=unknown; skipping the in-player tap and the motion check")
+            return
+        }
+        note("player-surface=\(describe(surface)) window=\(describe(app.windows.firstMatch.frame))")
+
+        let before = sampleSurface(surface)
+        attachSurface(surface, name: "video-pre-tap.png")
+
+        // A coordinate tap is the only way in: the play button lives inside a cross-origin
+        // iframe, which WebKit does not expose to the accessibility layer at all. The centre of
+        // the surface is where YouTube paints its large play button.
+        let target = app.coordinate(withNormalizedOffset: CGVector(dx: 0, dy: 0))
+            .withOffset(CGVector(dx: surface.midX, dy: surface.midY))
+        target.tap()
+        note("player-tap=(\(Int(surface.midX)),\(Int(surface.midY))) status=\(statusLabel())")
+
+        // Long enough for the tap to register, the stream to start, and YouTube's control
+        // overlay to fade out again, so the overlay itself cannot be mistaken for motion.
+        sleep(8.0)
+        let settled = sampleSurface(surface)
+        sleep(3.5)
+        let later = sampleSurface(surface)
+        attachSurface(surface, name: "video-post-tap.png")
+
+        let tapEffect = changeFraction(before, settled)
+        let motion = changeFraction(settled, later)
+        note("surface-change-after-tap=\(format(tapEffect)) surface-motion=\(format(motion))")
+        // A playing video repaints most of the frame in 3.5s. A poster, an error card, or a
+        // stalled player repaints almost none of it.
+        let showing = motion >= 0.05
+        note("video-frame-showing=\(showing) (threshold=0.05) status=\(statusLabel())")
+        if !showing {
+            note("WARNING 05: the player surface is not moving, so the capture is a poster or an error, not playback")
+        }
+    }
+
+    /// The player surface fills the gap between the playlist heading and the controls row, so
+    /// its rectangle can be derived from two things that *are* in the accessibility tree rather
+    /// than guessed from a fixed aspect ratio against an unknown page padding. The heading is
+    /// found by geometry, not by label, because the label is a catalogue title in Devanagari
+    /// that this test has no business hard-coding.
+    private func playerSurfaceRect(below play: XCUIElement) -> CGRect? {
+        let window = app.windows.firstMatch.frame
+        guard play.exists, window.width > 0 else { return nil }
+        let bottom = play.frame.minY
+        let headingBottoms = app.staticTexts.allElementsBoundByIndex
+            .prefix(40)
+            .map { $0.frame }
+            .filter { $0.maxY < bottom - 40 && $0.height > 0 }
+            .map { $0.maxY }
+        let top = headingBottoms.max() ?? (window.minY + window.height * 0.12)
+        guard bottom - top > 60 else { return nil }
+        let rect = CGRect(x: window.minX, y: top, width: window.width, height: bottom - top)
+            .insetBy(dx: window.width * 0.1, dy: 8)
+        // WebKit reports page coordinates, so a scrolled page would hand back a rectangle that
+        // is not on screen at all. Refuse it rather than tap into nothing and call the silence
+        // a result.
+        guard window.contains(rect) else {
+            note("player-surface rejected: \(describe(rect)) is outside the window \(describe(window))")
+            return nil
+        }
+        return rect
+    }
+
+    /// Downsamples the surface to a small grid. Averaging away the detail is what makes the
+    /// comparison robust: encoder noise and one-pixel jitter disappear, while a genuinely
+    /// different video frame still changes most cells.
+    private func sampleSurface(_ rect: CGRect) -> [UInt8] {
+        guard let image = XCUIScreen.main.screenshot().image.cgImage else { return [] }
+        let scale = CGFloat(image.width) / max(app.windows.firstMatch.frame.width, 1)
+        let pixels = CGRect(
+            x: rect.minX * scale, y: rect.minY * scale,
+            width: rect.width * scale, height: rect.height * scale
+        ).integral
+        guard pixels.width >= 8, pixels.height >= 8,
+              let cropped = image.cropping(to: pixels),
+              let space = CGColorSpace(name: CGColorSpace.sRGB),
+              let context = CGContext(
+                  data: nil, width: 64, height: 36,
+                  bitsPerComponent: 8, bytesPerRow: 64 * 4, space: space,
+                  bitmapInfo: CGImageAlphaInfo.noneSkipLast.rawValue
+              )
+        else { return [] }
+        context.interpolationQuality = .medium
+        context.draw(cropped, in: CGRect(x: 0, y: 0, width: 64, height: 36))
+        guard let data = context.data else { return [] }
+        let buffer = data.bindMemory(to: UInt8.self, capacity: 64 * 36 * 4)
+        return Array(UnsafeBufferPointer(start: buffer, count: 64 * 36 * 4))
+    }
+
+    /// Fraction of sampled cells whose colour moved perceptibly.
+    private func changeFraction(_ first: [UInt8], _ second: [UInt8]) -> Double {
+        let count = min(first.count, second.count)
+        guard count >= 4 else { return 0 }
+        var changed = 0
+        var total = 0
+        for index in stride(from: 0, to: count - 3, by: 4) {
+            total += 1
+            let delta = abs(Int(first[index]) - Int(second[index]))
+                + abs(Int(first[index + 1]) - Int(second[index + 1]))
+                + abs(Int(first[index + 2]) - Int(second[index + 2]))
+            if delta > 24 { changed += 1 }
+        }
+        return total == 0 ? 0 : Double(changed) / Double(total)
+    }
+
+    /// A crop of just the player, so the artifact shows what the motion check was looking at.
+    private func attachSurface(_ rect: CGRect, name: String) {
+        let shot = XCUIScreen.main.screenshot()
+        guard let image = shot.image.cgImage else { return }
+        let scale = CGFloat(image.width) / max(app.windows.firstMatch.frame.width, 1)
+        let pixels = CGRect(
+            x: rect.minX * scale, y: rect.minY * scale,
+            width: rect.width * scale, height: rect.height * scale
+        ).integral
+        guard let cropped = image.cropping(to: pixels) else { return }
+        let data = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(data, "public.png" as CFString, 1, nil)
+        else { return }
+        CGImageDestinationAddImage(destination, cropped, nil)
+        guard CGImageDestinationFinalize(destination) else { return }
+        attach(name: name, uti: "public.png", payload: data as Data)
+        write(name: name, data: data as Data)
+        note("attached \(name) pixels=\(cropped.width)x\(cropped.height)")
+    }
+
+    private func describe(_ rect: CGRect) -> String {
+        "\(Int(rect.minX)),\(Int(rect.minY)) \(Int(rect.width))x\(Int(rect.height))"
+    }
+
+    private func format(_ value: Double) -> String {
+        String(format: "%.3f", value)
     }
 
     // MARK: - Capture

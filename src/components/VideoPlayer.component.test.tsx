@@ -250,6 +250,46 @@ describe('VideoPlayer failure recovery', () => {
     ).not.toBeInTheDocument()
   })
 
+  /**
+   * Option A on iOS: the embed declares an origin, so YouTube has no channel
+   * back to this frame and will never report a state. The screen has to be
+   * usable on that basis alone — the player mounted, the prompt shown, the
+   * external fallback offered, and no countdown to a failure that is not one.
+   */
+  it('stays usable when the player can never report a state', async () => {
+    vi.useFakeTimers()
+    const media = new FakeExternalMediaService(false)
+    render(
+      <VideoPlayer
+        catalog={canonicalCatalogFixture}
+        playlist={recordedPlaylist}
+        onClose={vi.fn()}
+        mediaService={media}
+        networkService={new FakeNetworkService('online')}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Play selected video' }))
+    await vi.advanceTimersByTimeAsync(0)
+
+    // Immediately, without waiting out any deadline.
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Tap play in the player to start हिन्दी प्रवचन.',
+    )
+    expect(media.handles[0].playCalls).toHaveLength(0)
+
+    // No state ever arrives. Nothing degrades.
+    await vi.advanceTimersByTimeAsync(300_000)
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Tap play in the player to start हिन्दी प्रवचन.',
+    )
+    expect(media.handles[0].disposeCalls).toHaveLength(0)
+    expect(screen.queryByRole('button', { name: /^Retry/ })).not.toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Open हिन्दी प्रवचन in YouTube' }),
+    ).toBeInTheDocument()
+  })
+
   it('keeps metadata usable offline and enables the same retry after reconnection', async () => {
     const media = new FakeExternalMediaService()
     const network = new FakeNetworkService('offline')

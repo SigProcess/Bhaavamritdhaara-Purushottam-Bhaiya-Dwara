@@ -13,6 +13,13 @@ import { detectBrowserPlatform } from './browser/browserAdapters'
 
 const YOUTUBE_ANDROID_PACKAGE = 'com.google.android.youtube'
 
+/**
+ * The origin this app is published under on the web. It is the one identity
+ * YouTube can resolve for this project, so an embed that has no usable origin
+ * of its own declares this one.
+ */
+const PUBLISHED_WEB_ORIGIN = 'https://purushottambhaiya.netlify.app'
+
 interface YouTubePlayerEvent {
   readonly data: number
 }
@@ -140,11 +147,119 @@ function autoplayStartsPlayback(): boolean {
   return detectBrowserPlatform() !== 'ios'
 }
 
+/**
+ * Names the origin an embed has to declare for itself, or `undefined` when the
+ * page already has one YouTube can read.
+ *
+ * YouTube identifies an embedding client by the origin and referrer of the page
+ * that frames it, and reduces player functionality for a client it cannot
+ * identify. The Capacitor iOS web view serves the bundled app from
+ * `capacitor://localhost`, which resolves to nothing YouTube knows, and the
+ * result on a device is exactly that reduction: the player paints with its own
+ * play button and tapping it does nothing at all — no error, no retry state.
+ *
+ * The real condition is "the runtime origin is not an http(s) origin", not "the
+ * platform is iOS". Every http(s) host this app runs on — the published site,
+ * the Android Trusted Web Activity, the dev server, jsdom — already carries an
+ * identity YouTube accepts and is left alone. Any custom-scheme host has the
+ * same problem whatever platform it belongs to. Where no runtime can be
+ * inspected at all, assume the published origin, which keeps the existing path.
+ */
+function originToDeclare(
+  runtimeOrigin = typeof window === 'undefined'
+    ? PUBLISHED_WEB_ORIGIN
+    : window.location.origin,
+): string | undefined {
+  return /^https?:\/\//i.test(runtimeOrigin) ? undefined : PUBLISHED_WEB_ORIGIN
+}
+
+/**
+ * Builds an embed URL that declares who is framing it.
+ *
+ * `enablejsapi` is deliberately absent. The declared origin cannot match this
+ * page's real origin — that is the whole point of declaring it — so YouTube's
+ * postMessage replies have nowhere to land and the JS API could never deliver a
+ * state event or accept a command. Asking for an API that cannot answer would
+ * only leave the app waiting for a PLAYING event that never arrives. `mute` is
+ * absent too, and stays absent: these are devotional recordings, so one tap on
+ * YouTube's own play button beats silent playback.
+ */
+function declaredOriginEmbedUrl(options: {
+  readonly origin: string
+  readonly sourceVideoId?: string
+  readonly youtubePlaylistId?: string
+}): string {
+  const parameters = new URLSearchParams({
+    autoplay: '0',
+    rel: '0',
+    playsinline: '1',
+    origin: options.origin,
+    widget_referrer: options.origin,
+  })
+  if (options.sourceVideoId !== undefined) {
+    const path = encodeURIComponent(options.sourceVideoId)
+    return `https://www.youtube.com/embed/${path}?${parameters.toString()}`
+  }
+  parameters.set('list', options.youtubePlaylistId!)
+  return `https://www.youtube.com/embed/videoseries?${parameters.toString()}`
+}
+
 function findPlaylist(catalog: Catalog, request: PlaybackRequest): PlaylistRecord {
   const playlist = [...catalog.collectionPlaylists, ...catalog.standalonePlaylists]
     .find(({ id }) => id === request.playlistId)
   if (!playlist) throw new Error('PLAYLIST_NOT_FOUND')
   return playlist
+}
+
+/**
+ * A player that only YouTube drives.
+ *
+ * With no JS API channel there is no playback state to report and no way to
+ * start, seek, or stop playback from here, so this handle says so rather than
+ * pretending: it never emits a state, and `startsAutomatically` is false, which
+ * is what makes the caller present the embed as ready to tap immediately
+ * instead of counting down to a timeout. The accepted cost is that the app
+ * cannot display "Playing" or drive its own controls on this path.
+ */
+class DeclaredOriginEmbedHandle implements PlayerHandle {
+  readonly selectedVideoId
+  readonly startsAutomatically = false
+
+  constructor(
+    readonly requestId: PlaybackRequestId,
+    readonly playlistId: PlaybackRequest['playlistId'],
+    selectedVideoId: PlaybackRequest['videoId'],
+    private readonly iframe: HTMLIFrameElement,
+  ) {
+    this.selectedVideoId = selectedVideoId
+  }
+
+  /** YouTube's own play button is the only thing that can start this embed. */
+  play(): void {}
+
+  /** No API channel, so no position is observable. Zero is the honest answer. */
+  getCurrentTime(): number {
+    return 0
+  }
+
+  seekTo(): void {}
+
+  subscribeState(): Unsubscribe {
+    return () => {}
+  }
+
+  supportsFullscreen(): boolean {
+    return typeof this.iframe.requestFullscreen === 'function'
+  }
+
+  async enterFullscreen(): Promise<void> {
+    if (!this.iframe.requestFullscreen) throw new Error('FULLSCREEN_UNAVAILABLE')
+    await this.iframe.requestFullscreen()
+  }
+
+  dispose(): void {
+    this.iframe.remove()
+  }
 }
 
 class YouTubePlayerHandle implements PlayerHandle {
@@ -225,6 +340,10 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
    * `startsAutomatically: false` so the caller waits for the user instead of
    * treating a quiet player as a failure. The playlist fallback keeps
    * `autoplay: 0` so merely opening a playlist is silent.
+   *
+   * A runtime whose origin YouTube cannot resolve takes a different route
+   * entirely: a plain embed that declares the published origin, with no JS API,
+   * because without an identity YouTube will not play at all.
    */
   async prepare(request: PlaybackRequest, target: HTMLElement): Promise<PlayerHandle> {
     const playlist = findPlaylist(this.catalog, request)
@@ -238,6 +357,16 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
     }
 
     this.requests.set(request.requestId, { request, target })
+
+    const declaredOrigin = originToDeclare()
+    if (declaredOrigin !== undefined) {
+      return this.prepareDeclaredOriginEmbed(request, target, {
+        origin: declaredOrigin,
+        ...(video ? { sourceVideoId: video.sourceVideoId } : {}),
+        ...(video ? {} : { youtubePlaylistId: playlist.youtubePlaylistId! }),
+      })
+    }
+
     const api = await loadYouTubeApi()
 
     target.replaceChildren()
@@ -296,6 +425,40 @@ export class YouTubeIframeExternalMediaService implements ExternalMediaService {
         },
       })
     })
+  }
+
+  /**
+   * Mounts a plain embed and hands back a handle straight away. There is no
+   * load or ready event worth waiting for: once the iframe is in the document
+   * YouTube's player is the only thing left to act, and waiting on a signal
+   * that may never come is what made this screen look broken in the first
+   * place. The caller sees `startsAutomatically: false` and points the reader
+   * at the play button immediately.
+   */
+  private async prepareDeclaredOriginEmbed(
+    request: PlaybackRequest,
+    target: HTMLElement,
+    embed: {
+      readonly origin: string
+      readonly sourceVideoId?: string
+      readonly youtubePlaylistId?: string
+    },
+  ): Promise<PlayerHandle> {
+    target.replaceChildren()
+    const iframe = document.createElement('iframe')
+    iframe.src = declaredOriginEmbedUrl(embed)
+    iframe.title = 'YouTube video player'
+    iframe.allow = 'autoplay; encrypted-media; fullscreen; picture-in-picture'
+    iframe.allowFullscreen = true
+    iframe.setAttribute('frameborder', '0')
+    target.append(iframe)
+
+    return new DeclaredOriginEmbedHandle(
+      request.requestId,
+      request.playlistId,
+      request.videoId,
+      iframe,
+    )
   }
 
   async retry(requestId: PlaybackRequestId): Promise<PlayerHandle> {

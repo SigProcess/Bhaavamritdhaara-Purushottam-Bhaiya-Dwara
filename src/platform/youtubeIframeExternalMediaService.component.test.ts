@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { PlaybackRequestId } from '../domain/contracts'
 import { canonicalCatalogFixture } from '../test-support/fixtures/catalogs'
 import { YouTubeIframeExternalMediaService } from './youtubeIframeExternalMediaService'
@@ -177,6 +177,157 @@ describe('YouTubeIframeExternalMediaService', () => {
       listType: 'playlist',
       list: playlist.youtubePlaylistId,
     })
+  })
+})
+
+/**
+ * The Capacitor iOS web view serves the bundle from `capacitor://localhost`.
+ * YouTube cannot resolve that origin, so it reduces player functionality to the
+ * point where the embed paints and its play button does nothing at all. These
+ * cases pin the correction: declare the published origin on the embed URL, and
+ * do not ask for a JS API that could never answer across a declared origin.
+ */
+describe('YouTubeIframeExternalMediaService on an origin YouTube cannot resolve', () => {
+  const playlist = canonicalCatalogFixture.collectionPlaylists[0]
+  const video = playlist.videos![0]
+  const publishedOrigin = 'https://purushottambhaiya.netlify.app'
+
+  function useOrigin(origin: string): void {
+    vi.spyOn(window, 'location', 'get').mockReturnValue(
+      { ...window.location, origin } as unknown as Location,
+    )
+  }
+
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('declares the published origin and referrer, unmuted, with no JS API', async () => {
+    useOrigin('capacitor://localhost')
+    // No YouTube API is installed: taking the API path at all would throw here.
+    delete window.YT
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const target = document.createElement('div')
+
+    const handle = await service.prepare({
+      requestId: 'playback-capacitor' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, target)
+
+    const iframe = target.querySelector('iframe')
+    expect(iframe).not.toBeNull()
+    const url = new URL(iframe!.src)
+    expect(url.origin + url.pathname).toBe(
+      `https://www.youtube.com/embed/${encodeURIComponent(video.sourceVideoId)}`,
+    )
+    expect(url.searchParams.get('origin')).toBe(publishedOrigin)
+    expect(url.searchParams.get('widget_referrer')).toBe(publishedOrigin)
+    expect(url.searchParams.get('playsinline')).toBe('1')
+    expect(url.searchParams.get('autoplay')).toBe('0')
+    expect(url.searchParams.get('rel')).toBe('0')
+    expect(url.searchParams.has('enablejsapi')).toBe(false)
+    expect(url.searchParams.has('mute')).toBe(false)
+    expect(url.searchParams.has('muted')).toBe(false)
+    expect(iframe!.allowFullscreen).toBe(true)
+    expect(handle.startsAutomatically).toBe(false)
+  })
+
+  /**
+   * Nothing on this path can report playback, so the handle must not imply it
+   * can. A caller that saw a subscription accepted would wait for a state event
+   * that YouTube has no channel to deliver.
+   */
+  it('reports no playback state and no position, and cannot start playback', async () => {
+    useOrigin('capacitor://localhost')
+    delete window.YT
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const target = document.createElement('div')
+    const handle = await service.prepare({
+      requestId: 'playback-capacitor-state' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, target)
+
+    const listener = vi.fn()
+    const unsubscribe = handle.subscribeState(listener)
+    handle.play()
+    handle.seekTo(42)
+
+    expect(listener).not.toHaveBeenCalled()
+    expect(handle.getCurrentTime()).toBe(0)
+    unsubscribe()
+
+    handle.dispose()
+    expect(target.querySelector('iframe')).toBeNull()
+  })
+
+  it('declares the same identity on the playlist embed', async () => {
+    useOrigin('capacitor://localhost')
+    delete window.YT
+    const standalone = canonicalCatalogFixture.standalonePlaylists[0]
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const target = document.createElement('div')
+
+    await service.prepare({
+      requestId: 'playback-capacitor-playlist' as PlaybackRequestId,
+      playlistId: standalone.id,
+    }, target)
+
+    const url = new URL(target.querySelector('iframe')!.src)
+    expect(url.origin + url.pathname).toBe('https://www.youtube.com/embed/videoseries')
+    expect(url.searchParams.get('list')).toBe(standalone.youtubePlaylistId)
+    expect(url.searchParams.get('origin')).toBe(publishedOrigin)
+    expect(url.searchParams.has('enablejsapi')).toBe(false)
+  })
+
+  /**
+   * The guard is the origin scheme, not the platform. An https page keeps the
+   * controllable JS API player it has today, which is what mobile Safari, the
+   * Android Trusted Web Activity, and the desktop site all rely on.
+   */
+  it('leaves an https page on the JS API player', async () => {
+    installApi()
+    useOrigin('https://purushottambhaiya.netlify.app')
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const target = document.createElement('div')
+
+    const handle = await service.prepare({
+      requestId: 'playback-https' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, target)
+
+    expect(installs).toHaveLength(1)
+    expect(installs[0].options.videoId).toBe(video.sourceVideoId)
+    expect(target.querySelector('iframe')).toBeNull()
+    expect(handle.startsAutomatically).toBe(true)
+
+    const listener = vi.fn()
+    handle.subscribeState(listener)
+    installs[0].options.events.onStateChange({ data: 1 })
+    expect(listener).toHaveBeenCalledWith('playing')
+  })
+
+  it('keeps the Android Trusted Web Activity on the autoplaying JS API player', async () => {
+    installApi()
+    useOrigin('https://purushottambhaiya.netlify.app')
+    vi.spyOn(navigator, 'userAgent', 'get').mockReturnValue(
+      'Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Mobile Safari/537.36',
+    )
+    const service = new YouTubeIframeExternalMediaService(canonicalCatalogFixture)
+    const target = document.createElement('div')
+
+    const handle = await service.prepare({
+      requestId: 'playback-twa' as PlaybackRequestId,
+      playlistId: playlist.id,
+      videoId: video.id,
+    }, target)
+
+    expect(installs[0].options.playerVars).toMatchObject({ autoplay: 1, playsinline: 1, rel: 0 })
+    expect(installs[0].options.playerVars).not.toHaveProperty('mute')
+    expect(handle.startsAutomatically).toBe(true)
+    expect(target.querySelector('iframe')).toBeNull()
   })
 })
 
