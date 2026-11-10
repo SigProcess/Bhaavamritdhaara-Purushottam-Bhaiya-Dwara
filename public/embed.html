@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Bhaavamrit player</title>
+<!--
+  Player host for the Bhaavamrit iOS app.
+
+  The app's web view serves its bundled assets from `capacitor://localhost`. A page on a custom
+  scheme cannot send an HTTP `Origin` or `Referer` header, and YouTube reads those headers rather
+  than any parameter the embed URL declares, so an embed created directly by the app is refused
+  (error 153 in the equivalent `file://` probe). Declaring `origin`/`widget_referrer` does not
+  help: those parameters are inert.
+
+  This page exists only to supply a real HTTPS origin. The app frames this page, this page frames
+  the YouTube player, and YouTube sees `https://purushottambhaiya.netlify.app`. Player state and a
+  small command set travel between the two frames over `postMessage`.
+
+  Both ends of that channel are treated as untrusted:
+    * the video id comes from this page's own query string and nothing else, and must match
+      /^[A-Za-z0-9_-]{11}$/ exactly before it is used;
+    * inbound messages must come from this frame's parent, carry the expected envelope, and name
+      one of exactly three commands with a validated payload;
+    * nothing from a message is ever evaluated, navigated to, or written into markup.
+
+  Deliberately dependency-free and inline: one script, no bundler, no framework.
+-->
+<style>
+  html, body { margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden; }
+  #player, iframe { position: absolute; inset: 0; width: 100%; height: 100%; border: 0; }
+  .embed-message {
+    position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 1rem; color: #F0E6D6; background: #2C1810; text-align: center; font: 500 15px/1.5
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  }
+</style>
+</head>
+<body>
+<div id="player"></div>
+<script>
+(function () {
+  'use strict'
+
+  /** Envelope names. A message without the right `source` is ignored on both sides. */
+  var HOST_SOURCE = 'bhaavamrit-embed-host'
+  var EMBED_SOURCE = 'bhaavamrit-embed'
+
+  /**
+   * Origins allowed to command this player.
+   *
+   * `capacitor://localhost` is the iOS app's own origin (Capacitor 8 defaults, `iosScheme:
+   * capacitor` and `hostname: localhost`). `https://purushottambhaiya.netlify.app` is the site and
+   * the Android TWA.
+   *
+   * WebKit may serialise a custom-scheme origin as the opaque origin, in which case `event.origin`
+   * is the string "null" and no allowlist entry can match it. Those messages are accepted when
+   * they come from this frame's own parent, because the whole command set is play, pause and seek
+   * on the single video this page was already asked to host. A page that frames this one chose
+   * that video in the URL it used, so it gains nothing it could not get by framing YouTube
+   * directly: there is no account, no credential and no stored data here to reach.
+   */
+  var ALLOWED_PARENT_ORIGINS = ['capacitor://localhost', 'https://purushottambhaiya.netlify.app']
+  var OPAQUE_ORIGIN = 'null'
+
+  var VIDEO_ID_PATTERN = /^[A-Za-z0-9_-]{11}$/
+  var TIME_REPORT_INTERVAL_MS = 1000
+
+  var player = null
+  var playerReady = false
+  var fatal = false
+  var hostOrigin = null
+  var hostWindow = null
+  var announcedReady = false
+  var timeTimer = null
+
+  function videoIdFromQuery() {
+    var value = new URLSearchParams(window.location.search).get('v')
+    return value !== null && VIDEO_ID_PATTERN.test(value) ? value : null
+  }
+
+  function showMessage(text) {
+    var node = document.createElement('div')
+    node.className = 'embed-message'
+    // textContent only, never a markup-parsing sink: nothing here is ever parsed as HTML.
+    node.textContent = text
+    document.body.replaceChildren(node)
+  }
+
+  /**
+   * `postMessage` rejects a target origin that is not an absolute URL, so the opaque origin
+   * cannot be named and has to be addressed with the wildcard. Only player state travels
+   * outbound, to a frame that already chose the video.
+   */
+  function targetOriginFor(origin) {
+    return ALLOWED_PARENT_ORIGINS.indexOf(origin) === -1 ? '*' : origin
+  }
+
+  function send(message) {
+    if (hostWindow === null || hostOrigin === null) return
+    message.source = EMBED_SOURCE
+    try {
+      hostWindow.postMessage(message, targetOriginFor(hostOrigin))
+    } catch (error) {
+      // A parent that has gone away is not an error worth reporting anywhere.
+    }
+  }
+
+  function currentPosition() {
+    if (player === null || typeof player.getCurrentTime !== 'function') return 0
+    var position = player.getCurrentTime()
+    return typeof position === 'number' && isFinite(position) && position > 0 ? position : 0
+  }
+
+  function reportTime() {
+    send({ type: 'time', positionSeconds: currentPosition() })
+  }
+
+  function startTimeReports() {
+    if (timeTimer !== null) return
+    timeTimer = window.setInterval(reportTime, TIME_REPORT_INTERVAL_MS)
+  }
+
+  function stopTimeReports() {
+    if (timeTimer === null) return
+    window.clearInterval(timeTimer)
+    timeTimer = null
+  }
+
+  function announce() {
+    if (announcedReady || hostWindow === null) return
+    if (fatal) {
+      announcedReady = true
+      send({ type: 'state', state: 'failed' })
+      return
+    }
+    if (!playerReady) return
+    announcedReady = true
+    send({ type: 'ready' })
+    reportTime()
+  }
+
+  function emitState(state) {
+    if (state === 'playing') startTimeReports()
+    else stopTimeReports()
+    reportTime()
+    send({ type: 'state', state: state })
+  }
+
+  /** Closed command set. Anything else is dropped without a reply. */
+  function runCommand(type, payload) {
+    if (type === 'hello') {
+      announce()
+      return
+    }
+    if (player === null || !playerReady) return
+    if (type === 'play') {
+      player.playVideo()
+      return
+    }
+    if (type === 'pause') {
+      player.pauseVideo()
+      return
+    }
+    if (type === 'seek') {
+      var seconds = payload.positionSeconds
+      if (typeof seconds !== 'number' || !isFinite(seconds) || seconds < 0) return
+      player.seekTo(seconds, true)
+      reportTime()
+    }
+  }
+
+  window.addEventListener('message', function (event) {
+    // Only this frame's parent may command the player.
+    if (event.source === null || event.source !== window.parent) return
+    if (
+      ALLOWED_PARENT_ORIGINS.indexOf(event.origin) === -1 &&
+      event.origin !== OPAQUE_ORIGIN
+    ) return
+
+    var data = event.data
+    if (data === null || typeof data !== 'object') return
+    if (data.source !== HOST_SOURCE) return
+    var type = data.type
+    if (type !== 'hello' && type !== 'play' && type !== 'pause' && type !== 'seek') return
+
+    if (hostWindow === null) {
+      hostWindow = event.source
+      hostOrigin = event.origin
+    }
+    runCommand(type, data)
+  })
+
+  var videoId = videoIdFromQuery()
+  if (videoId === null) {
+    fatal = true
+    showMessage('This player link is not valid.')
+    return
+  }
+
+  window.onYouTubeIframeAPIReady = function () {
+    player = new window.YT.Player('player', {
+      videoId: videoId,
+      width: '100%',
+      height: '100%',
+      playerVars: {
+        // Created paused and never muted. WebKit only starts audible media from a gesture on the
+        // media itself, so YouTube's own play button inside this frame does the starting; these
+        // are devotional recordings, so an extra tap beats silence.
+        autoplay: 0,
+        rel: 0,
+        playsinline: 1,
+        enablejsapi: 1,
+      },
+      events: {
+        onReady: function () {
+          playerReady = true
+          announce()
+        },
+        onStateChange: function (event) {
+          var states = window.YT.PlayerState
+          if (event.data === states.PLAYING) emitState('playing')
+          else if (event.data === states.PAUSED) emitState('paused')
+          else if (event.data === states.ENDED) emitState('ended')
+        },
+        onError: function () {
+          stopTimeReports()
+          if (!announcedReady) {
+            fatal = true
+            announce()
+            return
+          }
+          send({ type: 'state', state: 'failed' })
+        },
+      },
+    })
+  }
+
+  var api = document.createElement('script')
+  api.src = 'https://www.youtube.com/iframe_api'
+  api.async = true
+  api.addEventListener('error', function () {
+    fatal = true
+    announce()
+  })
+  document.head.append(api)
+})()
+</script>
+</body>
+</html>
