@@ -1,5 +1,7 @@
 {
-  "previouslyDistributedReleaseIds": [],
+  "previouslyDistributedReleaseIds": [
+    "1.0"
+  ],
   "iosRelease": {
     "project": "ios/App/App.xcodeproj",
     "projectFile": "ios/App/App.xcodeproj/project.pbxproj",
